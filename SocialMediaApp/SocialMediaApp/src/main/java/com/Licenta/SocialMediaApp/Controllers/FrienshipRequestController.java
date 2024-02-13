@@ -13,8 +13,8 @@ public class FrienshipRequestController {
     @Autowired
     private FriendshipRequestRepository friendshipRequestRepository;
 
-    @PostMapping
-    public ResponseEntity<FriendshipRequest> createFriendshipRequest(@RequestBody FriendshipRequest request) {
+    @PostMapping("/sendRequest")
+    public ResponseEntity<FriendshipRequest> requestFriendship(@RequestBody FriendshipRequest request) {
         try {
             FriendshipRequest savedRequest = friendshipRequestRepository.save(request);
             return new ResponseEntity<>(savedRequest, HttpStatus.CREATED); // Return 200 OK with the saved request

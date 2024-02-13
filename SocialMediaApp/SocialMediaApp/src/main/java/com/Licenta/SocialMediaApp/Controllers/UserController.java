@@ -40,7 +40,13 @@ public class UserController {
         return user;
     }
 
-    /*@PostMapping("/{userId}/uploadProfileImage")
+    @GetMapping("/{userId}")
+    public ResponseEntity<User> getUserById(@PathVariable int userId) throws Exception {
+        User user = userService.findById(userId);
+        return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/{userId}/uploadProfileImage")
     public ResponseEntity<?> uploadProfileImage(@PathVariable int userId,
                                                 @RequestParam("file") MultipartFile file) {
         try {
@@ -50,7 +56,7 @@ public class UserController {
 
             // Upload the profile image
             String profileImageKey = s3Service.generateProfileImageKey(userId, file);
-            s3Service.putObject("social-media-bucket1", profileImageKey, file.getBytes());
+            s3Service.putObject(profileImageKey, file.getBytes());
 
             // Update user's profile image path in the database
             user.setProfileImagePath(profileImageKey);
@@ -61,7 +67,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error occurred: " + e.getMessage());
         }
-    }*/
+    }
 
     @GetMapping("/{userId}/loadProfileImage")
     public ResponseEntity<?> getProfileImage(@PathVariable int userId) {
@@ -71,6 +77,7 @@ public class UserController {
 
             String key = user.getProfileImagePath();
             byte[] imageBytes = s3Service.getObject(s3Bucket.getBucket(), key);
+            System.out.println("Profile Image!!!!!!!!");
 
             return ResponseEntity.ok()
                     .contentType(MediaType.IMAGE_JPEG) // Set appropriate content type based on the image
@@ -86,10 +93,10 @@ public class UserController {
         userRepository.deleteById(userId);
     }
 
-    @PatchMapping("/{userId}/editUsername")
-    public String updateUsername(@PathVariable int userId, @RequestBody String newUsername) {
+    @PatchMapping("/editUsername")
+    public String updateUsername(@RequestHeader("Authorization")String jwt, @RequestParam String newUsername) {
         try {
-            userService.updateUsername(userId, newUsername);
+            userService.updateUsername(newUsername, jwt);
             return "Username updated successfully.";
         } catch (Exception e) {
             return e.getMessage();

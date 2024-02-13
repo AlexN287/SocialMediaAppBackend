@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -15,4 +16,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     User getUsersByUsername(@Param("username") String username);
     List<User> findByUsernameContainingIgnoreCase(String username);
     boolean existsByUsername(String username);
+    Optional<User> findById(int userId);
 }

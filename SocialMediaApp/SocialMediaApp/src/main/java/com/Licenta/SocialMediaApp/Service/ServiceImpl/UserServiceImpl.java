@@ -34,12 +34,12 @@ public class UserServiceImpl implements UserService {
     }
     @Transactional
     @Override
-    public void updateUsername(int userId, String newUsername) throws Exception {
+    public void updateUsername(String newUsername, String jwt) throws Exception {
         if (userRepository.existsByUsername(newUsername)) {
             throw new Exception("Username already exists.");
         }
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new Exception("User not found."));
+        User user = findUserByJwt(jwt);
         user.setUsername(newUsername);
         userRepository.save(user);
     }
@@ -91,6 +91,14 @@ public class UserServiceImpl implements UserService {
 
         newUser.setProfileImagePath(profileImageKey);
         userRepository.save(newUser);
+    }
+
+    @Override
+    public User findById(int userId) throws Exception {
+        User user = userRepository.findById(userId).orElseThrow(() -> new Exception("User not found."));
+        user.setPassword(null);
+        user.setProfileImagePath(null);
+        return user;
     }
 
 }

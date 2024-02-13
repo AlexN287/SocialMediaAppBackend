@@ -16,16 +16,18 @@ public class FriendshipRequest {
     @Column(name = "friendship_id")
     private int id;
     @ManyToOne
+    @JoinColumn(name = "sender_id", referencedColumnName = "user_id")
     private User sender;
 
     @ManyToOne
+    @JoinColumn(name = "receiver_id", referencedColumnName = "user_id")
     private User receiver;
 
-    private String Status;
+    private String status;
 
     public FriendshipRequest(User sender, User receiver, String status) {
         this.sender = sender;
         this.receiver = receiver;
-        Status = status;
+        this.status = status;
     }
 }

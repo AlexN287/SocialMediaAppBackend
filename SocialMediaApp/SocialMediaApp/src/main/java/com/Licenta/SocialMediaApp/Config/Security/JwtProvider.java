@@ -23,7 +23,6 @@ public class JwtProvider {
 
         return jwt;
     }
-
     public static String getUsernameFromJwtToken(String jwt){
         jwt = jwt.substring(7);
 
