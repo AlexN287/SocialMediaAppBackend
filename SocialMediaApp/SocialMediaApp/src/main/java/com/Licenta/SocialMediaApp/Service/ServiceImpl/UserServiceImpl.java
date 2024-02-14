@@ -34,14 +34,18 @@ public class UserServiceImpl implements UserService {
     }
     @Transactional
     @Override
-    public void updateUsername(String newUsername, String jwt) throws Exception {
+    public String updateUsername(String newUsername, String jwt) throws Exception {
         if (userRepository.existsByUsername(newUsername)) {
             throw new Exception("Username already exists.");
         }
 
         User user = findUserByJwt(jwt);
+
         user.setUsername(newUsername);
         userRepository.save(user);
+
+        String newJwt = JwtProvider.generateToken(newUsername);
+        return  newJwt;
     }
     @Override
     public boolean existsByUsername(String username) {

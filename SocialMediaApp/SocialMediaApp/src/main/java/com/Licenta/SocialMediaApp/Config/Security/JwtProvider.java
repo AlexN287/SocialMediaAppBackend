@@ -23,6 +23,18 @@ public class JwtProvider {
 
         return jwt;
     }
+
+    public static String generateToken(String username)
+    {
+        String jwt = Jwts.builder()
+                .setIssuer("SocialMediaApp").setIssuedAt(new Date())
+                .setExpiration(new Date(new Date().getTime()+86400000))
+                .claim("username", username)
+                .signWith(key)
+                .compact();
+
+        return jwt;
+    }
     public static String getUsernameFromJwtToken(String jwt){
         jwt = jwt.substring(7);
 

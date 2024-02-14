@@ -39,7 +39,7 @@ public class FriendsListController {
         }
     }
 
-    @PostMapping
+    /*@PostMapping
     public ResponseEntity<FriendsList> createFriendsList(@RequestBody FriendsList friendsList) {
         try {
             FriendsList createdFriendsList = friendsListService.createFriendsList(friendsList);
@@ -48,10 +48,10 @@ public class FriendsListController {
             // Handle exceptions appropriately
             return ResponseEntity.status(500).build();
         }
-    }
-
+    }*/
     @GetMapping("/userFriends/{userId}")
     public List<FriendsList> getAllFriends(@PathVariable int userId) {
         return friendsListService.findFriendsByUserId(userId);
     }
+
 }

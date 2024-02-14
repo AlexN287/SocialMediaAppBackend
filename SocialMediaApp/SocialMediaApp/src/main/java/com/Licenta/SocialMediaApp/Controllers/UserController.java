@@ -94,12 +94,12 @@ public class UserController {
     }
 
     @PatchMapping("/editUsername")
-    public String updateUsername(@RequestHeader("Authorization")String jwt, @RequestParam String newUsername) {
+    public ResponseEntity<String> updateUsername(@RequestHeader("Authorization")String jwt, @RequestParam String newUsername) {
         try {
-            userService.updateUsername(newUsername, jwt);
-            return "Username updated successfully.";
+            String newJwt = userService.updateUsername(newUsername, jwt);
+            return ResponseEntity.ok().body(newJwt);
         } catch (Exception e) {
-            return e.getMessage();
+            return ResponseEntity.internalServerError().body("Change username failed");
         }
     }
 

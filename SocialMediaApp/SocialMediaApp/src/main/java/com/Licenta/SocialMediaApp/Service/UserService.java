@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface UserService {
     User findUserByJwt(String jwt);
-    void updateUsername(String newUsername, String jwt) throws Exception;
+    String updateUsername(String newUsername, String jwt) throws Exception;
     boolean existsByUsername(String username);
     List<User> findByUsernameContainingIgnoreCase(String username);
     void changePassword(String oldPassword, String newPassword, String jwt);
