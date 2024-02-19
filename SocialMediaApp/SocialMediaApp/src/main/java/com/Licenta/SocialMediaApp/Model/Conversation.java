@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "conversation")
 @Getter
@@ -23,4 +25,8 @@ public class Conversation {
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Column(name = "last_updated")
+    private LocalDateTime lastUpdated;
+
 }

@@ -1,8 +1,7 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
-import com.Licenta.SocialMediaApp.Repository.PostRepository;
+
 import com.Licenta.SocialMediaApp.Service.PostService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

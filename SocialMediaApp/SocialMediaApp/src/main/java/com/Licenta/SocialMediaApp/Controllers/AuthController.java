@@ -1,15 +1,11 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
 
-import com.Licenta.SocialMediaApp.Config.AwsS3.S3Bucket;
-import com.Licenta.SocialMediaApp.Config.AwsS3.S3Service;
 import com.Licenta.SocialMediaApp.Config.Security.JwtProvider;
 import com.Licenta.SocialMediaApp.Config.Security.UserDetailsServiceImpl;
 import com.Licenta.SocialMediaApp.Model.Authentication.AuthResponse;
 import com.Licenta.SocialMediaApp.Model.Authentication.LoginRequest;
-import com.Licenta.SocialMediaApp.Model.Authentication.RegisterRequest;
 import com.Licenta.SocialMediaApp.Model.User;
-import com.Licenta.SocialMediaApp.Repository.UserRepository;
 import com.Licenta.SocialMediaApp.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;

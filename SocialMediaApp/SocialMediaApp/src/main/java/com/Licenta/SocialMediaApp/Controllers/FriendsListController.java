@@ -1,9 +1,8 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
 import com.Licenta.SocialMediaApp.Model.FriendsList;
-import com.Licenta.SocialMediaApp.Repository.FriendsListRepository;
+import com.Licenta.SocialMediaApp.Model.User;
 import com.Licenta.SocialMediaApp.Service.FriendsListService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +26,6 @@ public class FriendsListController {
             return ResponseEntity.status(500).build();
         }
     }
-
     @GetMapping("/checkFriendship")
     public ResponseEntity<Boolean> checkIfUsersAreFriends(@RequestParam int userId1, @RequestParam int userId2) {
         try {
@@ -38,20 +36,20 @@ public class FriendsListController {
             return ResponseEntity.status(500).build();
         }
     }
-
-    /*@PostMapping
-    public ResponseEntity<FriendsList> createFriendsList(@RequestBody FriendsList friendsList) {
-        try {
-            FriendsList createdFriendsList = friendsListService.createFriendsList(friendsList);
-            return ResponseEntity.ok(createdFriendsList);
-        } catch (Exception e) {
-            // Handle exceptions appropriately
-            return ResponseEntity.status(500).build();
-        }
-    }*/
     @GetMapping("/userFriends/{userId}")
-    public List<FriendsList> getAllFriends(@PathVariable int userId) {
+    public List<User> getAllFriends(@PathVariable int userId) {
         return friendsListService.findFriendsByUserId(userId);
+    }
+    @DeleteMapping("/delete/{userid}")
+    public ResponseEntity<String> deleteFriend(@RequestHeader("Authorization")String jwt,@PathVariable int userid)
+    {
+        try {
+            friendsListService.deleteFriend(jwt, userid);
+            return ResponseEntity.ok().body("Friend deleted successfully.");
+        } catch (Exception e)
+        {
+            return ResponseEntity.internalServerError().body("Failed to delete friend");
+        }
     }
 
 }
