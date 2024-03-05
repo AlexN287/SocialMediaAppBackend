@@ -58,4 +58,18 @@ public class S3Service {
 
         return key;
     }
+
+    public String generateGroupImageKey(int conversationId, MultipartFile file)
+    {
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+
+        if (originalFilename != null && originalFilename.lastIndexOf('.') != -1) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+        }
+
+        String key = "conversations/" + conversationId + "/" + S3ContentType.CONVERSATION + extension;
+
+        return key;
+    }
 }

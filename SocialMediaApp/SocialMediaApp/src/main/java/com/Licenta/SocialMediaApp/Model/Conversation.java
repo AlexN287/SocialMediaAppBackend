@@ -18,13 +18,21 @@ public class Conversation {
     @Column(name = "conversation_id")
     private int id;
 
-    @OneToOne
+    private String name;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "conversation_image_path")
+    private String conversationImagePath;
+
+    /*@OneToOne
     @JoinColumn(name = "group_id")
     private Group group;
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private User user;*/
 
     @Column(name = "last_updated")
     private LocalDateTime lastUpdated;

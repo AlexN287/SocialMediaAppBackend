@@ -6,7 +6,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 
 import java.io.Serializable;
-@Embeddable
+/*@Embeddable
 public class GroupMembersId implements Serializable {
     @OneToOne
     @JoinColumn(name = "group_id")
@@ -15,4 +15,4 @@ public class GroupMembersId implements Serializable {
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
-}
+}*/

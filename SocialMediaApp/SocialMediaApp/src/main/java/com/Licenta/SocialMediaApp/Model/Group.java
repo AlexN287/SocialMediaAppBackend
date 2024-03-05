@@ -7,7 +7,7 @@ import lombok.Setter;
 
 import java.util.Date;
 
-@Entity
+/*@Entity
 @Table(name = "groups")
 @Getter
 @Setter
@@ -22,8 +22,13 @@ public class Group {
 
     private Date timestamp;
 
-    public Group(String name, Date timestamp) {
+    @OneToOne
+    @JoinColumn(name = "conversation_id", referencedColumnName = "conversation_id")
+    private Conversation conversation;
+
+    public Group(String name, Date timestamp, Conversation conversation) {
         this.name = name;
         this.timestamp = timestamp;
+        this.conversation = conversation;
     }
-}
+}*/

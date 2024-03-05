@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
+/*@Entity
 @Table(name = "group_members")
 @Getter
 @Setter
@@ -15,4 +15,4 @@ import lombok.Setter;
 public class GroupMembers {
     @EmbeddedId
     private  GroupMembersId id;
-}
+}*/
