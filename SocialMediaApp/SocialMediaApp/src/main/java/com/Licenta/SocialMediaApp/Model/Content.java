@@ -16,7 +16,8 @@ public class Content {
     @Column(name = "content_id")
     private int id;
 
-    private String path;
+    @Column(name = "text_content")
+    private String textContent;
 
     @Column(name = "image_path")
     private String imagePath;
@@ -24,8 +25,8 @@ public class Content {
     @Column(name = "video_path")
     private String videoPath;
 
-    public Content(String path, String imagePath, String videoPath) {
-        this.path = path;
+    public Content(String textContent, String imagePath, String videoPath) {
+        this.textContent = textContent;
         this.imagePath = imagePath;
         this.videoPath = videoPath;
     }

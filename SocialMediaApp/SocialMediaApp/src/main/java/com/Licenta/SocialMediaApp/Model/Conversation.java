@@ -26,15 +26,10 @@ public class Conversation {
     @Column(name = "conversation_image_path")
     private String conversationImagePath;
 
-    /*@OneToOne
-    @JoinColumn(name = "group_id")
-    private Group group;
-
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;*/
-
     @Column(name = "last_updated")
     private LocalDateTime lastUpdated;
+
+    @Column(name = "last_message")
+    private String lastMessage;
 
 }

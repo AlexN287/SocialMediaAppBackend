@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -23,7 +24,7 @@ public class Message {
     private Conversation conversation;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "sender_id")
     private User sender;
 
     @OneToOne
@@ -31,5 +32,5 @@ public class Message {
     private Content content;
 
     @Column(name = "message_timestamp")
-    private Date timestamp;
+    private LocalDateTime timestamp;
 }

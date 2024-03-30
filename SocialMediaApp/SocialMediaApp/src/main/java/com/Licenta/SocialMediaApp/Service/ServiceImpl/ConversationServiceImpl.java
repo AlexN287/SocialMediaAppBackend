@@ -1,6 +1,8 @@
 package com.Licenta.SocialMediaApp.Service.ServiceImpl;
 
+import com.Licenta.SocialMediaApp.Config.AwsS3.S3Bucket;
 import com.Licenta.SocialMediaApp.Config.AwsS3.S3Service;
+import com.Licenta.SocialMediaApp.Exceptions.ConversationAlreadyExistsException;
 import com.Licenta.SocialMediaApp.Model.BodyRequests.GroupRequest;
 import com.Licenta.SocialMediaApp.Model.Conversation;
 import com.Licenta.SocialMediaApp.Model.ConversationMembers;
@@ -10,9 +12,12 @@ import com.Licenta.SocialMediaApp.Repository.ConversationMembersRepository;
 import com.Licenta.SocialMediaApp.Repository.ConversationRepository;
 import com.Licenta.SocialMediaApp.Repository.UserRepository;
 import com.Licenta.SocialMediaApp.Service.ConversationService;
+import com.Licenta.SocialMediaApp.Service.FriendsListService;
 import com.Licenta.SocialMediaApp.Service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -24,16 +29,19 @@ public class ConversationServiceImpl implements ConversationService {
     private final ConversationMembersRepository conversationMembersRepository;
     private final UserService userService;
     private final UserRepository userRepository;
-
     private final S3Service s3Service;
+    private final S3Bucket s3Bucket;
+    private final FriendsListService friendsListService;
     public ConversationServiceImpl(ConversationRepository conversationRepository, UserService userService,
                                    ConversationMembersRepository conversationMembersRepository, S3Service s3Service,
-                                   UserRepository userRepository) {
+                                   UserRepository userRepository, S3Bucket s3Bucket, FriendsListService friendsListService) {
         this.conversationRepository = conversationRepository;
         this.userService = userService;
         this.conversationMembersRepository = conversationMembersRepository;
         this.s3Service = s3Service;
         this.userRepository = userRepository;
+        this.s3Bucket = s3Bucket;
+        this.friendsListService = friendsListService;
     }
 
     @Override
@@ -58,53 +66,65 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     @Transactional
     public void createPrivateConversation(int userId, String jwt) {
+        User loggedUser = userService.findUserByJwt(jwt);
+        List<Integer> existingConversations = conversationMembersRepository.findConversationIdByUserIds(loggedUser.getId(), userId);
+
+        if (!existingConversations.isEmpty()) {
+            // Throw the custom exception if a conversation already exists
+            throw new ConversationAlreadyExistsException("A private conversation between the specified users already exists.");
+        }
+
+        // Proceed to create a new conversation if none exists
         Conversation newConversation = new Conversation();
         newConversation.setCreatedAt(LocalDateTime.now());
-        newConversation = conversationRepository.save(newConversation);
+        conversationRepository.save(newConversation);
 
-        User loggedUser = userService.findUserByJwt(jwt);
-
-        ConversationMembers conversationMembers = new ConversationMembers();
-        ConversationMembersId conversationMembersId = new ConversationMembersId();
-        conversationMembersId.setConversation(newConversation);
-        conversationMembersId.setUser(loggedUser);
-        conversationMembers.setId(conversationMembersId);
-        conversationMembersRepository.save(conversationMembers);
-
-        ConversationMembersId conversationMembersId1 = new ConversationMembersId();
-        conversationMembersId1.setConversation(newConversation);
-        User user = new User();
-        user.setId(userId);
-        conversationMembersId1.setUser(user);
-        ConversationMembers conversationMembers1 = new ConversationMembers();
-        conversationMembers1.setId(conversationMembersId1);
-        conversationMembersRepository.save(conversationMembers1);
+        // Add the logged user to the conversation
+        addMemberToConversation(newConversation, loggedUser);
+        // Add the other user to the conversation
+        User otherUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        addMemberToConversation(newConversation, otherUser);
     }
 
+    private void addMemberToConversation(Conversation conversation, User user) {
+        ConversationMembers conversationMembers = new ConversationMembers();
+        ConversationMembersId conversationMembersId = new ConversationMembersId();
+        conversationMembersId.setConversation(conversation);
+        conversationMembersId.setUser(user);
+        conversationMembers.setId(conversationMembersId);
+        conversationMembersRepository.save(conversationMembers);
+    }
     @Override
     @Transactional
-    public void createGroupConversation(GroupRequest groupRequest) throws IOException {
+    public void createGroupConversation(String name,
+                                        MultipartFile groupImage,
+                                        List<Integer> members,
+                                        String jwt) throws IOException {
         Conversation newConversation = new Conversation();
-        newConversation.setName(groupRequest.getName());
-        newConversation.setCreatedAt(groupRequest.getCreatedAt());
+        newConversation.setName(name);
+        newConversation.setCreatedAt(LocalDateTime.now());
 
+        // Save the conversation to generate its ID
         newConversation = conversationRepository.save(newConversation);
 
-        String groupImagePath = s3Service.generateGroupImageKey(newConversation.getId(), groupRequest.getGroupImage());
-        newConversation.setConversationImagePath(groupImagePath);
-
-        s3Service.putObject(groupImagePath, groupRequest.getGroupImage().getBytes());
-
-        for(User user : groupRequest.getMembers())
-        {
-            ConversationMembers conversationMembers = new ConversationMembers();
-            ConversationMembersId conversationMembersId = new ConversationMembersId();
-            conversationMembersId.setConversation(newConversation);
-            conversationMembersId.setUser(user);
-            conversationMembers.setId(conversationMembersId);
-
-            conversationMembersRepository.save(conversationMembers);
+        // Assume S3Service is injected and handles image storage
+        if (groupImage != null && !groupImage.isEmpty()) {
+            String groupImagePath = s3Service.generateGroupImageKey(newConversation.getId(), groupImage);
+            newConversation.setConversationImagePath(groupImagePath);
+            s3Service.putObject(groupImagePath, groupImage.getBytes());
         }
+
+        User loggedUser = userService.findUserByJwt(jwt);
+        addMemberToConversation(newConversation, loggedUser);
+        // Add each member to the conversation
+        for (Integer userId : members) {
+            User user = new User();
+            user.setId(userId);
+            addMemberToConversation(newConversation, user);
+        }
+
+        // Update conversation after adding members and potentially setting the image path
+        conversationRepository.save(newConversation);
     }
 
     @Override
@@ -149,5 +169,27 @@ public class ConversationServiceImpl implements ConversationService {
         User loggedUser = userService.findUserByJwt(jwt);
 
         removeGroupMember(conversationId, loggedUser.getId());
+    }
+
+    @Override
+    public byte[] loadConversationImage(int conversationId, String jwt) throws IOException {
+        System.out.println("Conversation Image");
+
+        User loggedUser = userService.findUserByJwt(jwt);
+
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new RuntimeException("Conversation not found with ID: " + conversationId));
+
+        String key;
+
+        if(conversation.getConversationImagePath() == null)
+        {
+            User user = conversationMembersRepository.findOtherUserInPrivateConversation(conversationId, loggedUser.getId());
+            key = user.getProfileImagePath();
+        }
+        else {
+            key = conversation.getConversationImagePath();
+        }
+        return s3Service.getObject(s3Bucket.getBucket(), key);
     }
 }

@@ -1,10 +1,16 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
+import com.Licenta.SocialMediaApp.Exceptions.ConversationAlreadyExistsException;
 import com.Licenta.SocialMediaApp.Model.BodyRequests.GroupRequest;
 import com.Licenta.SocialMediaApp.Model.Conversation;
+import com.Licenta.SocialMediaApp.Model.User;
 import com.Licenta.SocialMediaApp.Service.ConversationService;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,21 +29,29 @@ public class ConversationController {
     }
 
     @PostMapping("/private/create")
-    public ResponseEntity<?> createPrivateConversation(
+    public ResponseEntity<?> createPrivateConversationControllerMethod(
             @RequestParam int userId,
             @RequestHeader("Authorization") String jwt) {
         try {
             conversationService.createPrivateConversation(userId, jwt);
             return ResponseEntity.ok().body("Private conversation created successfully.");
+        } catch (ConversationAlreadyExistsException e) {
+            // Return a bad request or conflict response
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
+            // Generic error handling
             return ResponseEntity.badRequest().body("Failed to create private conversation: " + e.getMessage());
         }
     }
+
     @PostMapping("/group/create")
-    public ResponseEntity<String> createGroupConversation(@RequestBody GroupRequest groupRequest)
-    {
+    public ResponseEntity<String> createGroupConversation(
+            @RequestParam String name,
+            @RequestParam List<Integer> members,
+            @RequestParam MultipartFile groupImage,
+            @RequestHeader("Authorization")String jwt) {
         try {
-            conversationService.createGroupConversation(groupRequest);
+            conversationService.createGroupConversation(name, groupImage, members ,jwt);
             return ResponseEntity.ok().body("Group conversation created successfully.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to create group conversation: " + e.getMessage());
@@ -72,6 +86,19 @@ public class ConversationController {
             return ResponseEntity.ok().body("Left group successfully.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error leaving the group: " + e.getMessage());
+        }
+    }
+    @GetMapping("/{conversationId}/image")
+    public ResponseEntity<?> loadConversationImage(@PathVariable int conversationId, @RequestHeader("Authorization") String jwt)
+    {
+        try {
+            byte[] image = conversationService.loadConversationImage(conversationId, jwt);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG) // Set appropriate content type based on the image
+                    .body(new ByteArrayResource(image));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error occurred: " + e.getMessage());
         }
     }
 }
