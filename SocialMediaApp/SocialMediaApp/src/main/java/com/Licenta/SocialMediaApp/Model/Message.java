@@ -1,9 +1,11 @@
 package com.Licenta.SocialMediaApp.Model;
 
+import com.Licenta.SocialMediaApp.Model.Enums.MessageType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Transient;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -33,4 +35,7 @@ public class Message {
 
     @Column(name = "message_timestamp")
     private LocalDateTime timestamp;
+
+    @Transient
+    private MessageType messageType;
 }
