@@ -2,6 +2,7 @@ package com.Licenta.SocialMediaApp.Model;
 
 import com.Licenta.SocialMediaApp.Model.Enums.MessageType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +16,7 @@ import java.util.Date;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,4 +40,12 @@ public class Message {
 
     @Transient
     private MessageType messageType;
+
+    public Message(Conversation conversation, User sender, Content content, LocalDateTime timestamp, MessageType messageType) {
+        this.conversation = conversation;
+        this.sender = sender;
+        this.content = content;
+        this.timestamp = timestamp;
+        this.messageType = messageType;
+    }
 }

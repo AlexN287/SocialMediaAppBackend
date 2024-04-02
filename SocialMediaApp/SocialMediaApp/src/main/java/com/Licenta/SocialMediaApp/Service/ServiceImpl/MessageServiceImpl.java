@@ -16,7 +16,6 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
     private final ContentRepository contentRepository;
-
     public MessageServiceImpl(MessageRepository messageRepository, ConversationRepository conversationRepository, ContentRepository contentRepository) {
         this.messageRepository = messageRepository;
         this.conversationRepository = conversationRepository;
