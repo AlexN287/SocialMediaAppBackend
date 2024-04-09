@@ -32,4 +32,6 @@ public class Conversation {
     @Column(name = "last_message")
     private String lastMessage;
 
+    @Column(name = "is_group")
+    private boolean isGroup;
 }

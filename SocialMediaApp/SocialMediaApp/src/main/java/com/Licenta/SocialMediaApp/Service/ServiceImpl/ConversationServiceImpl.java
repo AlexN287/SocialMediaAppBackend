@@ -4,6 +4,7 @@ import com.Licenta.SocialMediaApp.Config.AwsS3.S3Bucket;
 import com.Licenta.SocialMediaApp.Config.AwsS3.S3Service;
 import com.Licenta.SocialMediaApp.Exceptions.ConversationAlreadyExistsException;
 import com.Licenta.SocialMediaApp.Model.BodyRequests.GroupRequest;
+import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.Conversation;
 import com.Licenta.SocialMediaApp.Model.ConversationMembers;
 import com.Licenta.SocialMediaApp.Model.ConversationMembersId;
@@ -14,6 +15,7 @@ import com.Licenta.SocialMediaApp.Repository.UserRepository;
 import com.Licenta.SocialMediaApp.Service.ConversationService;
 import com.Licenta.SocialMediaApp.Service.FriendsListService;
 import com.Licenta.SocialMediaApp.Service.UserService;
+import com.Licenta.SocialMediaApp.Utils.Utils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ConversationServiceImpl implements ConversationService {
@@ -77,6 +80,7 @@ public class ConversationServiceImpl implements ConversationService {
         // Proceed to create a new conversation if none exists
         Conversation newConversation = new Conversation();
         newConversation.setCreatedAt(LocalDateTime.now());
+        newConversation.setGroup(false);
         conversationRepository.save(newConversation);
 
         // Add the logged user to the conversation
@@ -103,7 +107,7 @@ public class ConversationServiceImpl implements ConversationService {
         Conversation newConversation = new Conversation();
         newConversation.setName(name);
         newConversation.setCreatedAt(LocalDateTime.now());
-
+        newConversation.setGroup(false);
         // Save the conversation to generate its ID
         newConversation = conversationRepository.save(newConversation);
 
@@ -158,7 +162,8 @@ public class ConversationServiceImpl implements ConversationService {
         // Check if the user is actually a member of the conversation to be removed
         boolean isMember = conversationMembersRepository.existsById(new ConversationMembersId(conversation, user));
         if (isMember) {
-            conversationMembersRepository.deleteById(new ConversationMembersId(conversation, user));
+            ConversationMembersId conversationMembersId = new ConversationMembersId(conversation, user);
+            conversationMembersRepository.deleteById(conversationMembersId);
         } else {
             throw new RuntimeException("User is not a member of the conversation.");
         }
@@ -191,5 +196,24 @@ public class ConversationServiceImpl implements ConversationService {
             key = conversation.getConversationImagePath();
         }
         return s3Service.getObject(s3Bucket.getBucket(), key);
+    }
+
+    @Override
+    public List<User> getMembersByConversationId(int conversationId) {
+        List<ConversationMembers> members = conversationMembersRepository.findByConversationId(conversationId);
+
+        return members.stream()
+                .map(member -> member.getId().getUser())
+                // Access User through the embedded ID
+                .collect(Collectors.toList());
+    }
+    public List<UserResponse> findFriendsNotInConversation(String jwt, int conversationId) {
+        User loggedUser = userService.findUserByJwt(jwt);
+
+        List<User> friendsNotInConversation = conversationMembersRepository.findAllFriendsNotInConversation(loggedUser.getId(), conversationId);
+        // Using Utils.convertToUserResponse directly
+        return friendsNotInConversation.stream()
+                .map(Utils::convertToUserResponse)
+                .collect(Collectors.toList());
     }
 }

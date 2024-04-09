@@ -23,11 +23,11 @@ public class Message {
     @Column(name = "message_id")
     private int id;
 
-    @OneToOne
+    @ManyToOne  // Changed from @OneToOne to @ManyToOne
     @JoinColumn(name = "conversation_id")
     private Conversation conversation;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "sender_id")
     private User sender;
 
@@ -40,7 +40,6 @@ public class Message {
 
     @Transient
     private MessageType messageType;
-
     public Message(Conversation conversation, User sender, Content content, LocalDateTime timestamp, MessageType messageType) {
         this.conversation = conversation;
         this.sender = sender;

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -44,5 +45,8 @@ public class MessageServiceImpl implements MessageService {
         messageRepository.save(message);
 
         return newMessage;
+    }
+    public List<Message> getMessagesByConversationId(int conversationId) {
+        return messageRepository.findByConversationId(conversationId);
     }
 }

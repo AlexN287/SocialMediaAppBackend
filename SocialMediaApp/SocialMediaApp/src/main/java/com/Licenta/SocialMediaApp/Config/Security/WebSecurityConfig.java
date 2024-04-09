@@ -35,7 +35,6 @@ public class WebSecurityConfig {
                         .requestMatchers("/auth/signup").permitAll()
                         .requestMatchers("/upload").permitAll()
                         .requestMatchers("/user/{userId}/uploadProfileImage").permitAll()
-                        .requestMatchers("/user/{userId}/loadProfileImage").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )

@@ -1,6 +1,7 @@
 package com.Licenta.SocialMediaApp.Service;
 
 import com.Licenta.SocialMediaApp.Model.BodyRequests.GroupRequest;
+import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.Conversation;
 import com.Licenta.SocialMediaApp.Model.ConversationMembers;
 import com.Licenta.SocialMediaApp.Model.ConversationMembersId;
@@ -18,4 +19,6 @@ public interface ConversationService {
     void removeGroupMember(int conversationId, int userId);
     void leaveGroup(int conversationId, String jwt);
     byte[] loadConversationImage(int conversationId, String jwt) throws IOException;
+    List<User> getMembersByConversationId(int conversationId);
+    List<UserResponse> findFriendsNotInConversation(String jwt, int conversationId);
 }
