@@ -1,10 +1,8 @@
 package com.Licenta.SocialMediaApp.Service;
 
-import com.Licenta.SocialMediaApp.Model.BodyRequests.GroupRequest;
+
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.Conversation;
-import com.Licenta.SocialMediaApp.Model.ConversationMembers;
-import com.Licenta.SocialMediaApp.Model.ConversationMembersId;
 import com.Licenta.SocialMediaApp.Model.User;
 import org.springframework.web.multipart.MultipartFile;
 

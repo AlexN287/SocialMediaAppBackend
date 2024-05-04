@@ -30,9 +30,9 @@ public class S3Service {
         s3Client.putObject(objectRequest, RequestBody.fromBytes(file));
     }
 
-    public byte[] getObject(String buketName, String key) throws IOException {
+    public byte[] getObject(String key) throws IOException {
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(buketName)
+                .bucket(s3Bucket.getBucket())
                 .key(key)
                 .build();
 
@@ -69,6 +69,20 @@ public class S3Service {
         }
 
         String key = "conversations/" + conversationId + "/" + S3ContentType.CONVERSATION + extension;
+
+        return key;
+    }
+
+    public String generatePostKey(int postId, int userId, MultipartFile file)
+    {
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+
+        if (originalFilename != null && originalFilename.lastIndexOf('.') != -1) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+        }
+
+        String key = "users/" + userId + "/" + "posts/" + S3ContentType.POST + "/" + postId + extension;
 
         return key;
     }

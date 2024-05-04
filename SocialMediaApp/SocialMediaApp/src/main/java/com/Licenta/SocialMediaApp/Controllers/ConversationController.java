@@ -1,7 +1,6 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
 import com.Licenta.SocialMediaApp.Exceptions.ConversationAlreadyExistsException;
-import com.Licenta.SocialMediaApp.Model.BodyRequests.GroupRequest;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.Conversation;
 import com.Licenta.SocialMediaApp.Model.Message;

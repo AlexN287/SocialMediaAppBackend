@@ -1,6 +1,7 @@
 package com.Licenta.SocialMediaApp.Service;
 
 import com.Licenta.SocialMediaApp.Model.User;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
@@ -12,6 +13,7 @@ public interface UserService {
     boolean existsByUsername(String username);
     List<User> findByUsernameContainingIgnoreCase(String username);
     void changePassword(String oldPassword, String newPassword, String jwt);
-    void registerUser(User user, MultipartFile profileImage) throws Exception;
-    User findById(int userId) throws Exception;
+    User findById(int userId) throws EntityNotFoundException;
+    void uploadUserProfileImage(int userId, MultipartFile file) throws Exception;
+    byte[] getUserProfileImage(int userId) throws Exception;
 }

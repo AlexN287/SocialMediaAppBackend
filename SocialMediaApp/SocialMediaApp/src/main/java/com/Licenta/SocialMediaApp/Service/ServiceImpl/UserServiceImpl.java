@@ -5,7 +5,9 @@ import com.Licenta.SocialMediaApp.Config.Security.JwtProvider;
 import com.Licenta.SocialMediaApp.Model.User;
 import com.Licenta.SocialMediaApp.Repository.UserRepository;
 import com.Licenta.SocialMediaApp.Service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -53,9 +55,7 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public List<User> findByUsernameContainingIgnoreCase(String username) {
-        List<User> users = userRepository.findByUsernameContainingIgnoreCase(username);
-        users.forEach(user -> user.setPassword(null)); // Set the password to null for each user
-        return users;
+        return userRepository.findByUsernameContainingIgnoreCase(username);
     }
 
     @Override
@@ -71,38 +71,36 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
     }
-    @Transactional
     @Override
-    public void registerUser(User user, MultipartFile profileImage) throws Exception {
-        User isExist = userRepository.getUsersByUsername(user.getUsername());
+    public User findById(int userId) throws EntityNotFoundException {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+    }
 
-        if(isExist!=null)
-        {
-            throw new Exception("Username already exists");
-        }
 
-        User newUser = new User();
+    @Override
+    public void uploadUserProfileImage(int userId, MultipartFile file) throws Exception {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception("User not found"));
 
-        newUser.setUsername(user.getUsername());
-        newUser.setEmail(user.getEmail());
-        newUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        newUser.setProfileImagePath("/path");
+        String profileImageKey = s3Service.generateProfileImageKey(userId, file);
+        s3Service.putObject(profileImageKey, file.getBytes());
 
-        User savedUser = userRepository.save(newUser);
-
-        String profileImageKey = s3Service.generateProfileImageKey(savedUser.getId(), profileImage);
-        s3Service.putObject(profileImageKey, profileImage.getBytes());
-
-        newUser.setProfileImagePath(profileImageKey);
-        userRepository.save(newUser);
+        user.setProfileImagePath(profileImageKey);
+        userRepository.save(user);
     }
 
     @Override
-    public User findById(int userId) throws Exception {
-        User user = userRepository.findById(userId).orElseThrow(() -> new Exception("User not found."));
-        user.setPassword(null);
-        user.setProfileImagePath(null);
-        return user;
+    @Cacheable(value = "profileImages", key = "#userId")
+    public byte[] getUserProfileImage(int userId) throws Exception {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception("User not found"));
+
+        if (user.getProfileImagePath() == null || user.getProfileImagePath().isEmpty()) {
+            throw new Exception("No profile image set for user");
+        }
+
+        return s3Service.getObject(user.getProfileImagePath());
     }
 
 }

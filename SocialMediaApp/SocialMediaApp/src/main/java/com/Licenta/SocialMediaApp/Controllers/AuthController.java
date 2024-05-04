@@ -6,6 +6,7 @@ import com.Licenta.SocialMediaApp.Config.Security.UserDetailsServiceImpl;
 import com.Licenta.SocialMediaApp.Model.Authentication.AuthResponse;
 import com.Licenta.SocialMediaApp.Model.Authentication.LoginRequest;
 import com.Licenta.SocialMediaApp.Model.User;
+import com.Licenta.SocialMediaApp.Service.AuthenticationService;
 import com.Licenta.SocialMediaApp.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -23,22 +24,15 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    private final UserService userService;
+    private final AuthenticationService authenticationService;
 
-    public AuthController(UserService userService)
+    public AuthController(AuthenticationService authenticationService)
     {
-        this.userService=userService;
+        this.authenticationService = authenticationService;
     }
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
-
     @PostMapping("/signup")
     public AuthResponse createUser(@RequestPart User user, @RequestPart MultipartFile profileImage) throws Exception {
-        userService.registerUser(user, profileImage);
+        authenticationService.registerUser(user, profileImage);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
 
@@ -52,7 +46,7 @@ public class AuthController {
     @PostMapping("/signin")
     public AuthResponse signIn(@RequestBody LoginRequest loginRequest)
     {
-        Authentication authentication = authenticate(loginRequest.getUsername(), loginRequest.getPassword());
+        Authentication authentication = authenticationService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
 
         String token = JwtProvider.generateToken(authentication);
 
@@ -60,24 +54,6 @@ public class AuthController {
 
         return authResponse;
     }
-
-    private Authentication authenticate(String username,String password)
-    {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-        if(userDetails==null)
-        {
-            throw new BadCredentialsException("Invalid username");
-        }
-
-        if(!passwordEncoder.matches(password, userDetails.getPassword()))
-        {
-            throw new BadCredentialsException("Password incorrect");
-        }
-
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-    }
-
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {

@@ -19,15 +19,11 @@ public class Content {
     @Column(name = "text_content")
     private String textContent;
 
-    @Column(name = "image_path")
-    private String imagePath;
+    @Column(name = "file_path")
+    private String filePath;
 
-    @Column(name = "video_path")
-    private String videoPath;
-
-    public Content(String textContent, String imagePath, String videoPath) {
+    public Content(String textContent, String filePath) {
         this.textContent = textContent;
-        this.imagePath = imagePath;
-        this.videoPath = videoPath;
+        this.filePath = filePath;
     }
 }

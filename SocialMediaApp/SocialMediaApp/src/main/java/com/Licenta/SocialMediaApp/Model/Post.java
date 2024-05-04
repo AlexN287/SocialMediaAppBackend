@@ -24,16 +24,14 @@ public class Post {
     @JoinColumn(name = "content_id")
     private Content content;
 
-    @Column(name = "like_nr")
+/*    @Column(name = "like_nr")
     private int likeNr;
 
     @Column(name = "comments_nr")
-    private int commentsNr;
+    private int commentsNr;*/
 
-    public Post(User user, Content content, int likeNr, int commentsNr) {
+    public Post(User user, Content content) {
         this.user = user;
         this.content = content;
-        this.likeNr = likeNr;
-        this.commentsNr = commentsNr;
     }
 }

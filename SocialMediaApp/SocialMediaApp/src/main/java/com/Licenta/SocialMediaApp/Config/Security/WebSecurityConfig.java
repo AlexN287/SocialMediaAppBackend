@@ -33,8 +33,6 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/auth/signin").permitAll()
                         .requestMatchers("/auth/signup").permitAll()
-                        .requestMatchers("/upload").permitAll()
-                        .requestMatchers("/user/{userId}/uploadProfileImage").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )

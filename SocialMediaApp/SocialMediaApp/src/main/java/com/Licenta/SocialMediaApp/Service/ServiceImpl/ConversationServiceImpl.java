@@ -3,7 +3,6 @@ package com.Licenta.SocialMediaApp.Service.ServiceImpl;
 import com.Licenta.SocialMediaApp.Config.AwsS3.S3Bucket;
 import com.Licenta.SocialMediaApp.Config.AwsS3.S3Service;
 import com.Licenta.SocialMediaApp.Exceptions.ConversationAlreadyExistsException;
-import com.Licenta.SocialMediaApp.Model.BodyRequests.GroupRequest;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.Conversation;
 import com.Licenta.SocialMediaApp.Model.ConversationMembers;
@@ -18,7 +17,6 @@ import com.Licenta.SocialMediaApp.Service.UserService;
 import com.Licenta.SocialMediaApp.Utils.Utils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -33,7 +31,6 @@ public class ConversationServiceImpl implements ConversationService {
     private final UserService userService;
     private final UserRepository userRepository;
     private final S3Service s3Service;
-    private final S3Bucket s3Bucket;
     private final FriendsListService friendsListService;
     public ConversationServiceImpl(ConversationRepository conversationRepository, UserService userService,
                                    ConversationMembersRepository conversationMembersRepository, S3Service s3Service,
@@ -43,7 +40,6 @@ public class ConversationServiceImpl implements ConversationService {
         this.conversationMembersRepository = conversationMembersRepository;
         this.s3Service = s3Service;
         this.userRepository = userRepository;
-        this.s3Bucket = s3Bucket;
         this.friendsListService = friendsListService;
     }
 
@@ -195,7 +191,7 @@ public class ConversationServiceImpl implements ConversationService {
         else {
             key = conversation.getConversationImagePath();
         }
-        return s3Service.getObject(s3Bucket.getBucket(), key);
+        return s3Service.getObject(key);
     }
 
     @Override

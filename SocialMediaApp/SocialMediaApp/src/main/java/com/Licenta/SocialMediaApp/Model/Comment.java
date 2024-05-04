@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -26,14 +27,14 @@ public class Comment {
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "content_id")
     private Content content;
 
     @Column(name = "comment_timestamp")
-    private Date timestamp;
+    private LocalDateTime timestamp;
 
-    public Comment(User user, Post post, Content content, Date commentTimestamp) {
+    public Comment(User user, Post post, Content content, LocalDateTime commentTimestamp) {
         this.user = user;
         this.post = post;
         this.content = content;
