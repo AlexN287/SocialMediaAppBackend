@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +54,7 @@ public class PostServiceImpl implements PostService {
         // Create and save the post
         Post post = new Post();
         post.setUser(loggedUser);
+        post.setCreatedAt(LocalDateTime.now());
 
         // Create and save the content
         Content content = new Content();
@@ -128,6 +130,13 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new IllegalArgumentException("Post not found with ID: " + postId));
 
         return post.getContent().getFilePath();
+    }
+
+    @Override
+    public List<Post> getPostsByFriends(String jwt) {
+        User loggedUser = userService.findUserByJwt(jwt);
+
+        return postRepository.findAllPostsByFriends(loggedUser.getId());
     }
 
 }

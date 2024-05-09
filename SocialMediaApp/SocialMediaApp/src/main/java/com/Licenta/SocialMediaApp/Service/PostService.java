@@ -17,4 +17,5 @@ public interface PostService {
     List<UserResponse> getUsersWhoLikedPost(int postId);
     byte[] getPostMedia(int postId) throws Exception;
     String getMediaKey(int postId) throws Exception;
+    List<Post> getPostsByFriends(String jwt);
 }

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "post")
 @Getter
@@ -23,6 +25,9 @@ public class Post {
     @OneToOne
     @JoinColumn(name = "content_id")
     private Content content;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
 /*    @Column(name = "like_nr")
     private int likeNr;

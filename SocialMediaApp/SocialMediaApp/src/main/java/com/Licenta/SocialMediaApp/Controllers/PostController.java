@@ -112,4 +112,8 @@ public class PostController {
         }
         return "application/octet-stream"; // Default or unknown file types
     }
+    @GetMapping("/users/friends/posts")
+    public List<Post> getFriendsPosts(@RequestHeader("Authorization") String jwt) {
+        return postService.getPostsByFriends(jwt);
+    }
 }
