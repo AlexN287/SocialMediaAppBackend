@@ -116,4 +116,18 @@ public class PostController {
     public List<Post> getFriendsPosts(@RequestHeader("Authorization") String jwt) {
         return postService.getPostsByFriends(jwt);
     }
+
+    @PatchMapping("/{postId}/updateContent")
+    public ResponseEntity<?> updatePostContent(
+            @PathVariable int postId,
+            @RequestParam("content") String content,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestHeader("Authorization") String jwt) {
+        try {
+            Post post = postService.updatePostContent(postId, content, file, jwt);
+            return ResponseEntity.ok(post);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Failed to update post", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

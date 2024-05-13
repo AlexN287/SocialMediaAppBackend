@@ -1,5 +1,6 @@
 package com.Licenta.SocialMediaApp.Service.ServiceImpl;
 
+import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.FriendsList;
 import com.Licenta.SocialMediaApp.Model.FriendsListId;
 import com.Licenta.SocialMediaApp.Model.FriendshipRequest;
@@ -9,11 +10,13 @@ import com.Licenta.SocialMediaApp.Repository.FriendshipRequestRepository;
 import com.Licenta.SocialMediaApp.Service.FriendsListService;
 import com.Licenta.SocialMediaApp.Service.FriendshipRequestService;
 import com.Licenta.SocialMediaApp.Service.UserService;
+import com.Licenta.SocialMediaApp.Utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @Service
 public class FriendshipRequestServiceImpl implements FriendshipRequestService {
@@ -27,11 +30,13 @@ public class FriendshipRequestServiceImpl implements FriendshipRequestService {
     }
 
     @Override
-    public List<User> findFriendshipRequestsSenders(String jwt) {
+    public List<UserResponse> findFriendshipRequestsSenders(String jwt) {
         User receiver = userService.findUserByJwt(jwt);
 
         List<User> senders = friendshipRequestRepository.findSendersByReceiverIdWithPendingStatus(receiver.getId());
-        return senders.stream().map(this::clearSensitiveInformation).collect(Collectors.toList());
+        return senders.stream()
+                .map(user -> Utils.convertToUserResponse(clearSensitiveInformation(user)))
+                .collect(Collectors.toList());
     }
 
     @Override

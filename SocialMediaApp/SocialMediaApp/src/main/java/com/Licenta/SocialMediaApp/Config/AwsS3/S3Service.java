@@ -6,9 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
 
@@ -43,6 +41,19 @@ public class S3Service {
             return bytes;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteObject(String key) {
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(s3Bucket.getBucket())
+                .key(key)
+                .build();
+
+        DeleteObjectResponse deleteObjectResponse = s3Client.deleteObject(deleteObjectRequest);
+        // Optionally handle the response, for example logging or throwing an error if not successful
+        if (!deleteObjectResponse.sdkHttpResponse().isSuccessful()) {
+            throw new RuntimeException("Failed to delete object from S3");
         }
     }
     public String generateProfileImageKey(int userId, MultipartFile file)

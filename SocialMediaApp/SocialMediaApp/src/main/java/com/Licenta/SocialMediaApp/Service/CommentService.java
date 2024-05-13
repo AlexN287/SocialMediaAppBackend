@@ -10,4 +10,5 @@ public interface CommentService {
     void deleteComment(int commentId, String jwt);
     long getCommentCountForPost(int postId);
     List<CommentResponse> getCommentsForPost(int postId);
+    Comment updateCommentText(int commentId, String newText, String jwt);
 }

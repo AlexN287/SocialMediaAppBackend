@@ -2,12 +2,16 @@ package com.Licenta.SocialMediaApp.Service.ServiceImpl;
 
 import com.Licenta.SocialMediaApp.Config.AwsS3.S3Service;
 import com.Licenta.SocialMediaApp.Config.Security.JwtProvider;
+import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.User;
+import com.Licenta.SocialMediaApp.Repository.FriendsListRepository;
 import com.Licenta.SocialMediaApp.Repository.UserRepository;
 import com.Licenta.SocialMediaApp.Service.UserService;
+import com.Licenta.SocialMediaApp.Utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.messaging.simp.user.SimpUser;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,18 +19,24 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
+    private final FriendsListRepository friendsListRepository;
+    private final SimpUserRegistry simpUserRegistry;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, S3Service s3Service)
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, S3Service s3Service, FriendsListRepository friendsListRepository, SimpUserRegistry simpUserRegistry)
     {
         this.userRepository=userRepository;
         this.passwordEncoder=passwordEncoder;
         this.s3Service=s3Service;
+        this.friendsListRepository = friendsListRepository;
+        this.simpUserRegistry = simpUserRegistry;
     }
     @Override
     public User findUserByJwt(String jwt) {
@@ -101,6 +111,25 @@ public class UserServiceImpl implements UserService {
         }
 
         return s3Service.getObject(user.getProfileImagePath());
+    }
+
+    @Override
+    public List<UserResponse> getConnectedFriends(String jwt) {
+        User loggedUser = findUserByJwt(jwt);
+
+        List<User> friends = friendsListRepository.findFriendsByUserId(loggedUser.getId());
+        Set<String> connectedUsernames = simpUserRegistry.getUsers().stream()
+                .map(SimpUser::getName)
+                .collect(Collectors.toSet());
+
+        System.out.println(connectedUsernames.size());
+        for (String username : connectedUsernames) {
+            System.out.println(username);
+        }
+        return friends.stream()
+                .filter(friend -> connectedUsernames.contains(friend.getUsername()))
+                .map(Utils::convertToUserResponse)
+                .collect(Collectors.toList());
     }
 
 }

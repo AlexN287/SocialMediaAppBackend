@@ -5,6 +5,7 @@ import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.Content;
 import com.Licenta.SocialMediaApp.Model.Post;
 import com.Licenta.SocialMediaApp.Model.User;
+import com.Licenta.SocialMediaApp.Repository.CommentRepository;
 import com.Licenta.SocialMediaApp.Repository.ContentRepository;
 import com.Licenta.SocialMediaApp.Repository.LikeRepository;
 import com.Licenta.SocialMediaApp.Repository.PostRepository;
@@ -14,7 +15,6 @@ import com.Licenta.SocialMediaApp.Utils.Utils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -28,14 +28,16 @@ public class PostServiceImpl implements PostService {
     private final UserService userService;
     private final ContentRepository contentRepository;
     private final S3Service s3Service;
+    private final CommentRepository commentRepository;
 
     public PostServiceImpl(PostRepository postRepository, LikeRepository likeRepository, UserService userService,
-                           ContentRepository contentRepository, S3Service s3Service){
+                           ContentRepository contentRepository, S3Service s3Service, CommentRepository commentRepository){
         this.postRepository = postRepository;
         this.likeRepository = likeRepository;
         this.userService = userService;
         this.contentRepository = contentRepository;
         this.s3Service = s3Service;
+        this.commentRepository = commentRepository;
     }
     @Override
     public int getPostsNrOfUser(int userId) {
@@ -74,6 +76,7 @@ public class PostServiceImpl implements PostService {
 
 
     @Override
+    @Transactional
     public void deletePost(int postId, String jwt) throws Exception {
         User loggedUser = userService.findUserByJwt(jwt);
         if (loggedUser == null) {
@@ -85,6 +88,14 @@ public class PostServiceImpl implements PostService {
 
         if (post.getUser().getId()!=(loggedUser.getId())) {
             throw new IllegalAccessException("Unauthorized to delete this post");
+        }
+
+        // Manually delete comments associated with the post
+        commentRepository.deleteByPostId(postId);
+        likeRepository.deleteByPostId(postId);
+
+        if (post.getContent().getFilePath()!= null){
+           s3Service.deleteObject(post.getContent().getFilePath());
         }
 
         postRepository.delete(post);
@@ -137,6 +148,32 @@ public class PostServiceImpl implements PostService {
         User loggedUser = userService.findUserByJwt(jwt);
 
         return postRepository.findAllPostsByFriends(loggedUser.getId());
+    }
+
+    @Transactional
+    @Override
+    public Post updatePostContent(int postId, String content, MultipartFile file, String jwt) throws Exception {
+        User loggedUser = userService.findUserByJwt(jwt);
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        if (post.getUser().getId()!=(loggedUser.getId())) {
+            throw new IllegalAccessException("Unauthorized to update this post");
+        }
+
+        Content postContent = post.getContent();
+
+        postContent.setTextContent(content);
+
+        if (file != null && !file.isEmpty()) {
+            String filePath = s3Service.generatePostKey(post.getId(), loggedUser.getId(), file);
+            postContent.setFilePath(filePath);
+            s3Service.putObject(filePath, file.getBytes());
+        }
+
+        contentRepository.save(postContent);
+        return postRepository.save(post);
     }
 
 }

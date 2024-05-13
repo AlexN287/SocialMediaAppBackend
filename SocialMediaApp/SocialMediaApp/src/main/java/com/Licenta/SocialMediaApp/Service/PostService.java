@@ -18,4 +18,5 @@ public interface PostService {
     byte[] getPostMedia(int postId) throws Exception;
     String getMediaKey(int postId) throws Exception;
     List<Post> getPostsByFriends(String jwt);
+    Post updatePostContent(int postId, String content, MultipartFile file, String jwt) throws Exception;
 }

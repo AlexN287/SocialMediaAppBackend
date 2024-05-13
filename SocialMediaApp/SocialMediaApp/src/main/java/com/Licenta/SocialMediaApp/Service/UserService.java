@@ -1,5 +1,6 @@
 package com.Licenta.SocialMediaApp.Service;
 
+import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,4 +17,5 @@ public interface UserService {
     User findById(int userId) throws EntityNotFoundException;
     void uploadUserProfileImage(int userId, MultipartFile file) throws Exception;
     byte[] getUserProfileImage(int userId) throws Exception;
+    List<UserResponse> getConnectedFriends(String jwt);
 }

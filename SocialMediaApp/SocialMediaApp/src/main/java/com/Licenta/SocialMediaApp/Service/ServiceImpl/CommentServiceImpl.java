@@ -13,6 +13,7 @@ import com.Licenta.SocialMediaApp.Service.CommentService;
 import com.Licenta.SocialMediaApp.Service.UserService;
 import com.Licenta.SocialMediaApp.Utils.Utils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -86,5 +87,22 @@ public class CommentServiceImpl implements CommentService {
         return comments.stream()
                 .map(Utils::convertToCommentResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public Comment updateCommentText(int commentId, String newText, String jwt) {
+        User user = userService.findUserByJwt(jwt);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+
+        if (comment.getUser().getId() != user.getId()) {
+            throw new IllegalStateException("Unauthorized to update this comment");
+        }
+
+        Content content = comment.getContent();
+        content.setTextContent(newText);
+        contentRepository.save(content);
+        return commentRepository.save(comment);
     }
 }

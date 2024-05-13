@@ -29,7 +29,6 @@ public class CommentController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable int commentId, @RequestHeader("Authorization") String jwt) {
         try {
@@ -54,5 +53,21 @@ public class CommentController {
     public ResponseEntity<List<CommentResponse>> getComments(@PathVariable int postId) {
         List<CommentResponse> comments = commentService.getCommentsForPost(postId);
         return ResponseEntity.ok(comments);
+    }
+    @PatchMapping("/edit/{commentId}")
+    public ResponseEntity<?> updateCommentContent(
+            @PathVariable int commentId,
+            @RequestParam("text") String newText,
+            @RequestHeader("Authorization") String jwt) {
+        try {
+            Comment updatedComment = commentService.updateCommentText(commentId, newText, jwt);
+            return ResponseEntity.ok(updatedComment);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

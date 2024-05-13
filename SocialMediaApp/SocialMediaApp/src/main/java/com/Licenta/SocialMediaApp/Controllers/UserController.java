@@ -1,11 +1,8 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
-import com.Licenta.SocialMediaApp.Config.AwsS3.S3Bucket;
-import com.Licenta.SocialMediaApp.Config.AwsS3.S3Service;
 import com.Licenta.SocialMediaApp.Model.BodyRequests.PasswordChangeRequest;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.User;
-import com.Licenta.SocialMediaApp.Repository.UserRepository;
 import com.Licenta.SocialMediaApp.Service.UserService;
 import com.Licenta.SocialMediaApp.Utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,6 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/user")
@@ -101,4 +101,10 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Password change failed due to an internal error");
         }
     }
+
+    @GetMapping("/connectedFriends")
+    public List<UserResponse> getConnectedFriends(@RequestHeader("Authorization") String jwt) {
+        return userService.getConnectedFriends(jwt);
+    }
+
 }

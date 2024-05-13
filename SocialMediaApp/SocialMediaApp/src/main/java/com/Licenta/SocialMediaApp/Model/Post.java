@@ -22,7 +22,7 @@ public class Post {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "content_id")
     private Content content;
 

@@ -1,5 +1,6 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
+import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.FriendshipRequest;
 import com.Licenta.SocialMediaApp.Model.User;
 import com.Licenta.SocialMediaApp.Repository.FriendshipRequestRepository;
@@ -35,7 +36,7 @@ public class FrienshipRequestController {
         return friendshipRequestRepository.findBySenderIdAndReceiverId(senderId, receiverId).isPresent();
     }
     @GetMapping("/requests")
-    public List<User> getFriendshipRequestSenders(@RequestHeader("Authorization")String jwt) {
+    public List<UserResponse> getFriendshipRequestSenders(@RequestHeader("Authorization")String jwt) {
         return friendshipRequestService.findFriendshipRequestsSenders(jwt);
     }
     @GetMapping("/requestsNr")
