@@ -8,6 +8,7 @@ import com.Licenta.SocialMediaApp.Repository.FriendsListRepository;
 import com.Licenta.SocialMediaApp.Repository.UserRepository;
 import com.Licenta.SocialMediaApp.Service.UserService;
 import com.Licenta.SocialMediaApp.Utils.Utils;
+import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.messaging.simp.user.SimpUser;
@@ -29,14 +30,16 @@ public class UserServiceImpl implements UserService {
     private final S3Service s3Service;
     private final FriendsListRepository friendsListRepository;
     private final SimpUserRegistry simpUserRegistry;
+    private final Cache<Integer, byte[]> profileImageCache;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, S3Service s3Service, FriendsListRepository friendsListRepository, SimpUserRegistry simpUserRegistry)
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, S3Service s3Service, FriendsListRepository friendsListRepository, SimpUserRegistry simpUserRegistry, Cache<Integer, byte[]> profileImageCache)
     {
         this.userRepository=userRepository;
         this.passwordEncoder=passwordEncoder;
         this.s3Service=s3Service;
         this.friendsListRepository = friendsListRepository;
         this.simpUserRegistry = simpUserRegistry;
+        this.profileImageCache = profileImageCache;
     }
     @Override
     public User findUserByJwt(String jwt) {
@@ -102,16 +105,33 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(value = "profileImages", key = "#userId")
-    public byte[] getUserProfileImage(int userId) throws Exception {
+    public byte[] getUserProfileImage(int userId, String jwt) throws Exception {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new Exception("User not found"));
+
+        byte[] cachedImage = profileImageCache.getIfPresent(userId);
+        if (cachedImage != null) {
+            return cachedImage;
+        }
 
         if (user.getProfileImagePath() == null || user.getProfileImagePath().isEmpty()) {
             throw new Exception("No profile image set for user");
         }
 
-        return s3Service.getObject(user.getProfileImagePath());
+        byte[] imageBytes = s3Service.getObject(user.getProfileImagePath());
+
+        // Put the image in the cache
+
+        User loggedUser = findUserByJwt(jwt);
+
+        if(loggedUser.getId()==userId || friendsListRepository.isFriendshipExists(loggedUser.getId(), userId)){
+            profileImageCache.put(userId, imageBytes);
+        }
+
+        return imageBytes;
     }
+
+
 
     @Override
     public List<UserResponse> getConnectedFriends(String jwt) {

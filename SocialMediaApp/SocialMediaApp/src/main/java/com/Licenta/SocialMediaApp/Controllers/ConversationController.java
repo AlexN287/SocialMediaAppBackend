@@ -1,6 +1,7 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
 import com.Licenta.SocialMediaApp.Exceptions.ConversationAlreadyExistsException;
+import com.Licenta.SocialMediaApp.Model.BodyResponse.MessageResponse;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.Conversation;
 import com.Licenta.SocialMediaApp.Model.Message;
@@ -110,8 +111,16 @@ public class ConversationController {
     }
 
     @GetMapping("/{conversationId}/messages")
-    public List<Message> getMessagesByConversationId(@PathVariable int conversationId) {
-        return messageService.getMessagesByConversationId(conversationId);
+    public ResponseEntity<List<MessageResponse>> getMessagesByConversationId(@PathVariable int conversationId) {
+        try {
+            List<Message> messages = messageService.getMessagesByConversationId(conversationId);
+            List<MessageResponse> messageResponses = messages.stream()
+                    .map(Utils::convertToMessageResponse)
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(messageResponses, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     @GetMapping("/{conversationId}/members")
     public ResponseEntity<List<UserResponse>> getConversationMembers(@PathVariable int conversationId) {
@@ -139,5 +148,10 @@ public class ConversationController {
             // Log the exception details as needed
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/{conversationId}/content")
+    public List<Object> getConversationContent(@PathVariable int conversationId) {
+        return conversationService.getConversationContent(conversationId);
     }
 }

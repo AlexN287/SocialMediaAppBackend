@@ -1,12 +1,10 @@
 package com.Licenta.SocialMediaApp.Service.ServiceImpl;
 
 import com.Licenta.SocialMediaApp.Config.AwsS3.S3Service;
-import com.Licenta.SocialMediaApp.Config.Security.JwtProvider;
 import com.Licenta.SocialMediaApp.Config.Security.UserDetailsServiceImpl;
 import com.Licenta.SocialMediaApp.Model.User;
 import com.Licenta.SocialMediaApp.Repository.UserRepository;
 import com.Licenta.SocialMediaApp.Service.AuthenticationService;
-import com.Licenta.SocialMediaApp.Service.UserService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

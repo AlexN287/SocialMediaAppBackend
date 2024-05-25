@@ -64,10 +64,10 @@ public class UserController {
         }
     }
     @GetMapping("/{userId}/loadProfileImage")
-    public ResponseEntity<?> getProfileImage(@PathVariable int userId) {
+    public ResponseEntity<?> getProfileImage(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
         try {
             System.out.println("Profile image");
-            byte[] imageBytes = userService.getUserProfileImage(userId);
+            byte[] imageBytes = userService.getUserProfileImage(userId, jwt);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CACHE_CONTROL, "max-age=31536000")
                     .contentType(MediaType.IMAGE_JPEG) // Consider dynamically setting this based on the image data

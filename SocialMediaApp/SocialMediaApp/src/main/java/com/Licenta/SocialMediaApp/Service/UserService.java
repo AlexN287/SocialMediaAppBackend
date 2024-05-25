@@ -16,6 +16,6 @@ public interface UserService {
     void changePassword(String oldPassword, String newPassword, String jwt);
     User findById(int userId) throws EntityNotFoundException;
     void uploadUserProfileImage(int userId, MultipartFile file) throws Exception;
-    byte[] getUserProfileImage(int userId) throws Exception;
+    byte[] getUserProfileImage(int userId, String jwt) throws Exception;
     List<UserResponse> getConnectedFriends(String jwt);
 }

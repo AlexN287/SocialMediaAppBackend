@@ -9,6 +9,7 @@ import com.Licenta.SocialMediaApp.Repository.CommentRepository;
 import com.Licenta.SocialMediaApp.Repository.ContentRepository;
 import com.Licenta.SocialMediaApp.Repository.LikeRepository;
 import com.Licenta.SocialMediaApp.Repository.PostRepository;
+import com.Licenta.SocialMediaApp.Service.ModeratorService;
 import com.Licenta.SocialMediaApp.Service.PostService;
 import com.Licenta.SocialMediaApp.Service.UserService;
 import com.Licenta.SocialMediaApp.Utils.Utils;
@@ -29,15 +30,17 @@ public class PostServiceImpl implements PostService {
     private final ContentRepository contentRepository;
     private final S3Service s3Service;
     private final CommentRepository commentRepository;
+    private final ModeratorService moderatorService;
 
     public PostServiceImpl(PostRepository postRepository, LikeRepository likeRepository, UserService userService,
-                           ContentRepository contentRepository, S3Service s3Service, CommentRepository commentRepository){
+                           ContentRepository contentRepository, S3Service s3Service, CommentRepository commentRepository, ModeratorService moderatorService){
         this.postRepository = postRepository;
         this.likeRepository = likeRepository;
         this.userService = userService;
         this.contentRepository = contentRepository;
         this.s3Service = s3Service;
         this.commentRepository = commentRepository;
+        this.moderatorService = moderatorService;
     }
     @Override
     public int getPostsNrOfUser(int userId) {
@@ -86,7 +89,10 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
-        if (post.getUser().getId()!=(loggedUser.getId())) {
+        boolean isPostOwner = post.getUser().getId() == loggedUser.getId();
+        boolean isModerator = moderatorService.isModerator(jwt);
+
+        if (!isPostOwner && !isModerator) {
             throw new IllegalAccessException("Unauthorized to delete this post");
         }
 
@@ -174,6 +180,11 @@ public class PostServiceImpl implements PostService {
 
         contentRepository.save(postContent);
         return postRepository.save(post);
+    }
+
+    @Override
+    public List<Post> getPostsOrderedByReportCount() {
+        return postRepository.findAllPostsOrderedByReportCount();
     }
 
 }

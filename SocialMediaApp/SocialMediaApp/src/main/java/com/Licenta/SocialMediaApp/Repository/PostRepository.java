@@ -12,4 +12,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     List<Post> findByUser_Id(int userId);
     @Query("SELECT p FROM Post p WHERE p.user.id IN (SELECT f.id.user2.id FROM FriendsList f WHERE f.id.user1.id = :userId) OR p.user.id IN (SELECT f.id.user1.id FROM FriendsList f WHERE f.id.user2.id = :userId) ORDER BY p.createdAt DESC")
     List<Post> findAllPostsByFriends(@Param("userId") int userId);
+    @Query("SELECT p FROM Post p LEFT JOIN p.reports r GROUP BY p.id HAVING COUNT(r.id) > 0 ORDER BY COUNT(r.id) DESC")
+    List<Post> findAllPostsOrderedByReportCount();
+
 }

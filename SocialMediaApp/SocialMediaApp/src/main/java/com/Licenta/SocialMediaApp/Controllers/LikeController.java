@@ -1,7 +1,9 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
+import com.Licenta.SocialMediaApp.Model.BodyResponse.LikeResponse;
 import com.Licenta.SocialMediaApp.Model.Like;
 import com.Licenta.SocialMediaApp.Service.LikeService;
+import com.Licenta.SocialMediaApp.Utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +21,8 @@ public class LikeController {
     public ResponseEntity<?> addLike(@PathVariable int postId, @RequestHeader("Authorization") String jwt) {
         try {
             Like like = likeService.addLike(jwt, postId);
-            return new ResponseEntity<>(like, HttpStatus.CREATED);
+            LikeResponse likeResponse = Utils.convertToLikeResponse(like);
+            return new ResponseEntity<>(likeResponse, HttpStatus.CREATED);
         } catch (IllegalArgumentException | IllegalStateException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {

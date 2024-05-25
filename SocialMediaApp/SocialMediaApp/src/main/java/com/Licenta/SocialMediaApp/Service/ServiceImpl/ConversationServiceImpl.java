@@ -1,18 +1,13 @@
 package com.Licenta.SocialMediaApp.Service.ServiceImpl;
 
-import com.Licenta.SocialMediaApp.Config.AwsS3.S3Bucket;
 import com.Licenta.SocialMediaApp.Config.AwsS3.S3Service;
 import com.Licenta.SocialMediaApp.Exceptions.ConversationAlreadyExistsException;
+import com.Licenta.SocialMediaApp.Model.*;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
-import com.Licenta.SocialMediaApp.Model.Conversation;
-import com.Licenta.SocialMediaApp.Model.ConversationMembers;
-import com.Licenta.SocialMediaApp.Model.ConversationMembersId;
-import com.Licenta.SocialMediaApp.Model.User;
-import com.Licenta.SocialMediaApp.Repository.ConversationMembersRepository;
-import com.Licenta.SocialMediaApp.Repository.ConversationRepository;
-import com.Licenta.SocialMediaApp.Repository.UserRepository;
+import com.Licenta.SocialMediaApp.Repository.*;
 import com.Licenta.SocialMediaApp.Service.ConversationService;
 import com.Licenta.SocialMediaApp.Service.FriendsListService;
+import com.Licenta.SocialMediaApp.Service.MessageService;
 import com.Licenta.SocialMediaApp.Service.UserService;
 import com.Licenta.SocialMediaApp.Utils.Utils;
 import org.springframework.stereotype.Service;
@@ -21,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,15 +29,19 @@ public class ConversationServiceImpl implements ConversationService {
     private final UserRepository userRepository;
     private final S3Service s3Service;
     private final FriendsListService friendsListService;
+    private final MessageRepository messageRepository;
+    private final PollRepository pollRepository;
     public ConversationServiceImpl(ConversationRepository conversationRepository, UserService userService,
                                    ConversationMembersRepository conversationMembersRepository, S3Service s3Service,
-                                   UserRepository userRepository, S3Bucket s3Bucket, FriendsListService friendsListService) {
+                                   UserRepository userRepository, FriendsListService friendsListService, MessageRepository messageRepository, PollRepository pollRepository) {
         this.conversationRepository = conversationRepository;
         this.userService = userService;
         this.conversationMembersRepository = conversationMembersRepository;
         this.s3Service = s3Service;
         this.userRepository = userRepository;
         this.friendsListService = friendsListService;
+        this.messageRepository = messageRepository;
+        this.pollRepository = pollRepository;
     }
 
     @Override
@@ -211,5 +212,26 @@ public class ConversationServiceImpl implements ConversationService {
         return friendsNotInConversation.stream()
                 .map(Utils::convertToUserResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Object> getConversationContent(int conversationId) {
+        List<Message> messages = messageRepository.findByConversationId(conversationId);
+        List<Poll> polls = pollRepository.findByConversationId(conversationId);
+
+        List<Object> combinedList = new ArrayList<>();
+        combinedList.addAll(messages);
+        combinedList.addAll(polls);
+
+        combinedList.sort(Comparator.comparing(item -> {
+            if (item instanceof Message) {
+                return ((Message) item).getTimestamp();
+            } else if (item instanceof Poll) {
+                return ((Poll) item).getTimestamp(); // Assuming Poll has a createdTimestamp field
+            }
+            return null;
+        }));
+
+        return combinedList;
     }
 }

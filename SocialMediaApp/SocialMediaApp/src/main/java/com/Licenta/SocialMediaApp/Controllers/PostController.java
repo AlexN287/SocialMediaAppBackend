@@ -1,10 +1,14 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
 
+import com.Licenta.SocialMediaApp.Model.BodyResponse.PostResponse;
+import com.Licenta.SocialMediaApp.Model.BodyResponse.PostWithReports;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.Post;
-import com.Licenta.SocialMediaApp.Model.User;
+import com.Licenta.SocialMediaApp.Model.Report;
 import com.Licenta.SocialMediaApp.Service.PostService;
+import com.Licenta.SocialMediaApp.Service.ReportService;
+import com.Licenta.SocialMediaApp.Utils.Utils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,14 +17,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/post")
 public class PostController {
     private final PostService postService;
-
     public PostController(PostService postService) {
         this.postService = postService;
+
     }
 
     @GetMapping("/count/{userId}")
@@ -39,7 +44,8 @@ public class PostController {
             @RequestParam("text") String text) {
         try {
             Post post = postService.createPost(jwt, file, text);
-            return new ResponseEntity<>(post, HttpStatus.CREATED);
+            PostResponse postResponse = Utils.convertToPostResponse(post);
+            return new ResponseEntity<>(postResponse, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -62,14 +68,18 @@ public class PostController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<List<Post>> getAllPostsByUser(@PathVariable int userId) {
+    public ResponseEntity<List<PostResponse>> getAllPostsByUser(@PathVariable int userId) {
         try {
             List<Post> posts = postService.getAllPostsByUser(userId);
-            return new ResponseEntity<>(posts, HttpStatus.OK);
+            List<PostResponse> postResponses = posts.stream()
+                    .map(Utils::convertToPostResponse)
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(postResponses, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @GetMapping("/{postId}/likes/count")
     public ResponseEntity<Long> getLikesCount(@PathVariable int postId) {
@@ -113,8 +123,9 @@ public class PostController {
         return "application/octet-stream"; // Default or unknown file types
     }
     @GetMapping("/users/friends/posts")
-    public List<Post> getFriendsPosts(@RequestHeader("Authorization") String jwt) {
-        return postService.getPostsByFriends(jwt);
+    public List<PostResponse> getFriendsPosts(@RequestHeader("Authorization") String jwt) {
+        List<Post> posts = postService.getPostsByFriends(jwt);
+        return posts.stream().map(Utils::convertToPostResponse).collect(Collectors.toList());
     }
 
     @PatchMapping("/{postId}/updateContent")
@@ -125,9 +136,26 @@ public class PostController {
             @RequestHeader("Authorization") String jwt) {
         try {
             Post post = postService.updatePostContent(postId, content, file, jwt);
-            return ResponseEntity.ok(post);
+            PostResponse postResponse = Utils.convertToPostResponse(post);
+            return ResponseEntity.ok(postResponse);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>("Failed to update post", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/reported/ordered")
+    public ResponseEntity<?> getPostsOrderedByReportCount() {
+        try {
+            List<Post> posts = postService.getPostsOrderedByReportCount();
+            List<PostWithReports> postWithReportsList = posts.stream()
+                    .map(Utils::convertToPostWithReports)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(postWithReportsList);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

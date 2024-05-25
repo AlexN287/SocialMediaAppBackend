@@ -19,4 +19,5 @@ public interface ConversationService {
     byte[] loadConversationImage(int conversationId, String jwt) throws IOException;
     List<User> getMembersByConversationId(int conversationId);
     List<UserResponse> findFriendsNotInConversation(String jwt, int conversationId);
+    public List<Object> getConversationContent(int conversationId);
 }

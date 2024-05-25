@@ -3,6 +3,7 @@ package com.Licenta.SocialMediaApp.Controllers;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.CommentResponse;
 import com.Licenta.SocialMediaApp.Model.Comment;
 import com.Licenta.SocialMediaApp.Service.CommentService;
+import com.Licenta.SocialMediaApp.Utils.Utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +20,11 @@ public class CommentController {
     }
 
     @PostMapping("/{postId}")
-    public ResponseEntity<Comment> addComment(@PathVariable int postId, @RequestParam String commentText, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<CommentResponse> addComment(@PathVariable int postId, @RequestParam String commentText, @RequestHeader("Authorization") String jwt) {
         try {
             Comment comment = commentService.addComment(jwt, postId, commentText);
-            return new ResponseEntity<>(comment, HttpStatus.CREATED);
+            CommentResponse commentResponse = Utils.convertToCommentResponse(comment);
+            return new ResponseEntity<>(commentResponse, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -61,7 +63,8 @@ public class CommentController {
             @RequestHeader("Authorization") String jwt) {
         try {
             Comment updatedComment = commentService.updateCommentText(commentId, newText, jwt);
-            return ResponseEntity.ok(updatedComment);
+            CommentResponse commentResponse = Utils.convertToCommentResponse(updatedComment);
+            return ResponseEntity.ok(commentResponse);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalStateException e) {

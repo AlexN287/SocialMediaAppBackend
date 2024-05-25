@@ -1,11 +1,15 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
+import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.User;
 import com.Licenta.SocialMediaApp.Service.BlockListService;
+import com.Licenta.SocialMediaApp.Utils.Utils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/blockList")
@@ -39,7 +43,15 @@ public class BlockListController {
     }
 
     @GetMapping("/blockedBy/{userId}")
-    public List<User> getBlockedUsers(@PathVariable int userId) {
-       return blockListService.getBlockedUsersByUserId(userId);
+    public ResponseEntity<List<UserResponse>> getBlockedUsers(@PathVariable int userId) {
+        try {
+            List<User> blockedUsers = blockListService.getBlockedUsersByUserId(userId);
+            List<UserResponse> userResponses = blockedUsers.stream()
+                    .map(Utils::convertToUserResponse)
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(userResponses, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

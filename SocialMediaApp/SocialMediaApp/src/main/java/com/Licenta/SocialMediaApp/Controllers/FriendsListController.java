@@ -1,12 +1,16 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
+import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.FriendsList;
 import com.Licenta.SocialMediaApp.Model.User;
 import com.Licenta.SocialMediaApp.Service.FriendsListService;
+import com.Licenta.SocialMediaApp.Utils.Utils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/friendsList")
@@ -37,8 +41,16 @@ public class FriendsListController {
         }
     }
     @GetMapping("/userFriends/{userId}")
-    public List<User> getAllFriends(@PathVariable int userId) {
-        return friendsListService.findFriendsByUserId(userId);
+    public ResponseEntity<List<UserResponse>> getAllFriends(@PathVariable int userId) {
+        try {
+            List<User> friends = friendsListService.findFriendsByUserId(userId);
+            List<UserResponse> userResponses = friends.stream()
+                    .map(Utils::convertToUserResponse)
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(userResponses, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     @DeleteMapping("/delete/{userid}")
     public ResponseEntity<String> deleteFriend(@RequestHeader("Authorization")String jwt,@PathVariable int userid)
