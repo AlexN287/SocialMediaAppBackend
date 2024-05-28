@@ -49,6 +49,8 @@ public class ConversationServiceImpl implements ConversationService {
         User loggedUser = userService.findUserByJwt(jwt);
         List<Conversation> conversations =  conversationRepository.findConversationsByUserIdOrderedByMostRecent(loggedUser.getId());
 
+        List<Conversation> filteredConversations = new ArrayList<>();
+
         conversations.forEach(conversation -> {
             if (conversation.getName() == null || conversation.getConversationImagePath() == null) {
                 // Identify as a private conversation
@@ -57,10 +59,18 @@ public class ConversationServiceImpl implements ConversationService {
                 conversation.setName(user.getUsername());
                 // Set a default image or fetch from the other user's profile
                 conversation.setConversationImagePath(user.getProfileImagePath());
+
+                boolean areFriends = friendsListService.isFriendshipExists(loggedUser.getId(), user.getId());
+                if (areFriends) {
+                    filteredConversations.add(conversation);
+                }
+            }
+            else {
+                filteredConversations.add(conversation);
             }
         });
 
-        return conversations;
+        return filteredConversations;
     }
 
     @Override

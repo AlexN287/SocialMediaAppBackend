@@ -11,6 +11,7 @@ import com.Licenta.SocialMediaApp.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -44,15 +45,22 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public AuthResponse signIn(@RequestBody LoginRequest loginRequest)
+    public ResponseEntity<?> signIn(@RequestBody LoginRequest loginRequest)
     {
-        Authentication authentication = authenticationService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
+        try{
+            Authentication authentication = authenticationService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
 
-        String token = JwtProvider.generateToken(authentication);
+            String token = JwtProvider.generateToken(authentication);
 
-        AuthResponse authResponse = new AuthResponse(token, "Login succesfull");
+            AuthResponse authResponse = new AuthResponse(token, "Login succesfull");
 
-        return authResponse;
+            return ResponseEntity.ok(authResponse);
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
+        }
+
     }
 
     @PostMapping("/logout")

@@ -13,4 +13,10 @@ public class UserResponse {
     private String username;
     private String email;
     private String profileImagePath;
+
+    public UserResponse(String username, String email, String profileImagePath) {
+        this.username = username;
+        this.email = email;
+        this.profileImagePath = profileImagePath;
+    }
 }

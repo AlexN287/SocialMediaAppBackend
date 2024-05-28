@@ -17,4 +17,7 @@ public interface BlockListRepository extends JpaRepository<BlockList, BlockListI
 
     @Query("SELECT bl.id.blockedUser FROM BlockList bl WHERE bl.id.user.id = :userId")
     List<User> findBlockedUsersByUserId(@Param("userId") int userId);
+
+    @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END FROM BlockList b WHERE b.id.blockedUser.id = :blockedUserId AND b.id.user.id = :userId")
+    boolean existsByBlockedUserAndUser(@Param("userId") int userId, @Param("blockedUserId") int blockedUserId);
 }

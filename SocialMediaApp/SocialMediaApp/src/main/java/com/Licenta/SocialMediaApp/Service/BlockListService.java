@@ -8,4 +8,5 @@ public interface BlockListService {
     boolean blockUser(String jwt, int blockedUserId);
     boolean unblockUser(String jwt, int blockedUserId);
     List<User> getBlockedUsersByUserId(int userId);
+    boolean isUserBlockedBy(String jwt, int otherUserId);
 }

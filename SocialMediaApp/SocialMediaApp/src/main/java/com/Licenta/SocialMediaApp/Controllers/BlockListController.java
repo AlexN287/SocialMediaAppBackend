@@ -54,4 +54,14 @@ public class BlockListController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/isBlockedBy/{otherUserId}")
+    public ResponseEntity<Boolean> isUserBlockedBy(@RequestHeader("Authorization") String jwt, @PathVariable int otherUserId) {
+        try {
+            boolean isBlocked = blockListService.isUserBlockedBy(jwt, otherUserId);
+            return ResponseEntity.ok(isBlocked);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+        }
+    }
 }
