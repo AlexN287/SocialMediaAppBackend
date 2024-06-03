@@ -43,7 +43,7 @@ public class PostServiceImpl implements PostService {
         this.moderatorService = moderatorService;
     }
     @Override
-    public int getPostsNrOfUser(int userId) {
+    public int getPostsNrOfUser(Long userId) {
         return postRepository.countByUserId(userId);
     }
 
@@ -80,7 +80,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void deletePost(int postId, String jwt) throws Exception {
+    public void deletePost(Long postId, String jwt) throws Exception {
         User loggedUser = userService.findUserByJwt(jwt);
         if (loggedUser == null) {
             throw new IllegalArgumentException("User not found");
@@ -108,17 +108,17 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> getAllPostsByUser(int userId) {
+    public List<Post> getAllPostsByUser(Long userId) {
         return postRepository.findByUser_Id(userId);
     }
 
     @Override
-    public long getLikesCountForPost(int postId) {
+    public long getLikesCountForPost(Long postId) {
         return likeRepository.countByPostId(postId);
     }
 
     @Override
-    public List<UserResponse> getUsersWhoLikedPost(int postId) {
+    public List<UserResponse> getUsersWhoLikedPost(Long postId) {
         List<User> users = likeRepository.findUsersByPostId(postId);
         return users.stream()
                 .map(Utils::convertToUserResponse)
@@ -126,7 +126,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public byte[] getPostMedia(int postId) throws Exception {
+    public byte[] getPostMedia(Long postId) throws Exception {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found with ID: " + postId));
 
@@ -142,7 +142,7 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    public String getMediaKey(int postId) throws Exception{
+    public String getMediaKey(Long postId) throws Exception{
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found with ID: " + postId));
 
@@ -158,7 +158,7 @@ public class PostServiceImpl implements PostService {
 
     @Transactional
     @Override
-    public Post updatePostContent(int postId, String content, MultipartFile file, String jwt) throws Exception {
+    public Post updatePostContent(Long postId, String content, MultipartFile file, String jwt) throws Exception {
         User loggedUser = userService.findUserByJwt(jwt);
 
         Post post = postRepository.findById(postId)

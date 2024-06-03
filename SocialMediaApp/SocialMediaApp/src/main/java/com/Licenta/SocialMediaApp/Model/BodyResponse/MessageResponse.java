@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class MessageResponse {
-    private int id;
+    private Long id;
 
     private Conversation conversation;
 

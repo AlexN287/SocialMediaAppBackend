@@ -11,6 +11,8 @@ import com.Licenta.SocialMediaApp.Utils.Utils;
 import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.user.SimpUser;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -30,9 +32,9 @@ public class UserServiceImpl implements UserService {
     private final S3Service s3Service;
     private final FriendsListRepository friendsListRepository;
     private final SimpUserRegistry simpUserRegistry;
-    private final Cache<Integer, byte[]> profileImageCache;
+    private final Cache<Long, byte[]> profileImageCache;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, S3Service s3Service, FriendsListRepository friendsListRepository, SimpUserRegistry simpUserRegistry, Cache<Integer, byte[]> profileImageCache)
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, S3Service s3Service, FriendsListRepository friendsListRepository, SimpUserRegistry simpUserRegistry, Cache<Long, byte[]> profileImageCache)
     {
         this.userRepository=userRepository;
         this.passwordEncoder=passwordEncoder;
@@ -66,9 +68,18 @@ public class UserServiceImpl implements UserService {
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
     }
+
     @Override
     public List<User> findByUsernameContainingIgnoreCase(String username) {
-        return userRepository.findByUsernameContainingIgnoreCase(username);
+        Page<User> usersPage = userRepository.findByUsernameContainingIgnoreCase(username, PageRequest.of(0, 10));
+        return usersPage.getContent();
+    }
+
+    @Override
+    public List<User> searchByUsernameExcludingLoggedInUser(String username, String jwt) {
+        User loggedUser = findUserByJwt(jwt);
+        Page<User> usersPage = userRepository.searchByUsernameExcludingLoggedInUser(username, loggedUser.getId(), PageRequest.of(0, 10));
+        return usersPage.getContent();
     }
 
     @Override
@@ -85,14 +96,14 @@ public class UserServiceImpl implements UserService {
 
     }
     @Override
-    public User findById(int userId) throws EntityNotFoundException {
+    public User findById(Long userId) throws EntityNotFoundException {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
     }
 
 
     @Override
-    public void uploadUserProfileImage(int userId, MultipartFile file) throws Exception {
+    public void uploadUserProfileImage(Long userId, MultipartFile file) throws Exception {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new Exception("User not found"));
 
@@ -105,7 +116,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(value = "profileImages", key = "#userId")
-    public byte[] getUserProfileImage(int userId, String jwt) throws Exception {
+    public byte[] getUserProfileImage(Long userId, String jwt) throws Exception {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new Exception("User not found"));
 

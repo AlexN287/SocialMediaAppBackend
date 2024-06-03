@@ -27,7 +27,7 @@ public class ReportServiceImpl implements ReportService {
         return reportRepository.save(report);
     }
     @Override
-    public void deleteReportById(int reportId, String jwt) {
+    public void deleteReportById(Long reportId, String jwt) {
         if (!moderatorService.isModerator(jwt)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to perform this action");
         }
@@ -36,7 +36,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<Report> findByPostId(int postId) {
+    public List<Report> findByPostId(Long postId) {
         return reportRepository.findByPostId(postId);
     }
 }

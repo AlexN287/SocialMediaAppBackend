@@ -14,7 +14,7 @@ public class FriendshipRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "friendship_id")
-    private int id;
+    private Long id;
     @ManyToOne
     @JoinColumn(name = "sender_id", referencedColumnName = "user_id")
     private User sender;

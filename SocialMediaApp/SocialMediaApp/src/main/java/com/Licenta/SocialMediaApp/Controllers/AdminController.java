@@ -3,6 +3,8 @@ package com.Licenta.SocialMediaApp.Controllers;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserWithRoles;
 import com.Licenta.SocialMediaApp.Model.Enums.RoleEnum;
 import com.Licenta.SocialMediaApp.Service.AdminService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +23,7 @@ public class AdminController {
     }
 
     @PostMapping("/modifyUserRoles/{userId}")
-    public ResponseEntity<String> modifyUserRoles(@PathVariable int userId, @RequestParam List<String> roles, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<String> modifyUserRoles(@PathVariable Long userId, @RequestParam List<String> roles, @RequestHeader("Authorization") String jwt) {
         try {
             List<RoleEnum> roleNames = roles.stream()
                     .map(role -> RoleEnum.valueOf(role.toUpperCase()))
@@ -36,9 +38,11 @@ public class AdminController {
     }
 
     @GetMapping("/usersWithRoles")
-    public ResponseEntity<?> getAllUsersWithRoles(@RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<?> getAllUsersWithRoles(@RequestHeader("Authorization") String jwt,
+                                                  @RequestParam(defaultValue = "0") int page,
+                                                  @RequestParam(defaultValue = "10") int size) {
         try {
-            List<UserWithRoles> usersWithRoles = adminService.getAllUsersWithRoles(jwt);
+            Page<UserWithRoles> usersWithRoles = adminService.getAllUsersWithRoles(jwt, PageRequest.of(page, size));
             return ResponseEntity.ok(usersWithRoles);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode().value()).body(e.getReason());

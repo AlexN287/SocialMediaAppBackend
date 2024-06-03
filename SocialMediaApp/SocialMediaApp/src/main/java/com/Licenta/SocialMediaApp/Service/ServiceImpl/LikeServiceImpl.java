@@ -25,7 +25,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public Like addLike(String jwt, int postId) {
+    public Like addLike(String jwt, Long postId) {
         User loggedUser = userService.findUserByJwt(jwt);
 
         if (loggedUser == null) {
@@ -45,7 +45,7 @@ public class LikeServiceImpl implements LikeService {
         return likeRepository.save(like);
     }
     @Override
-    public void deleteLike(String jwt, int postId) {
+    public void deleteLike(String jwt, Long postId) {
         User loggedUser = userService.findUserByJwt(jwt);
 
         if (loggedUser == null) {
@@ -64,7 +64,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public boolean checkUserLikedPost(String jwt, int postId) {
+    public boolean checkUserLikedPost(String jwt, Long postId) {
 
         User loggedUser = userService.findUserByJwt(jwt);
 

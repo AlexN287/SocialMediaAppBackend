@@ -8,6 +8,9 @@ import com.Licenta.SocialMediaApp.Repository.RoleRepository;
 import com.Licenta.SocialMediaApp.Repository.UserRepository;
 import com.Licenta.SocialMediaApp.Service.AdminService;
 import com.Licenta.SocialMediaApp.Service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +40,7 @@ public class AdminServiceImpl implements AdminService {
                 .anyMatch(role -> role.getRoleName() == RoleEnum.ADMIN);
     }
     @Transactional
-    public void assignRolesToUser(Integer userId, List<RoleEnum> roleNames, String jwt) {
+    public void assignRolesToUser(Long userId, List<RoleEnum> roleNames, String jwt) {
 
         if (!isAdmin(jwt)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to perform this action");
@@ -60,13 +63,13 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<UserWithRoles> getAllUsersWithRoles(String jwt) {
+    public Page<UserWithRoles> getAllUsersWithRoles(String jwt, Pageable pageable) {
         if (!isAdmin(jwt)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to perform this action");
         }
 
-        List<User> users = userRepository.findAll();
-        return users.stream()
+        Page<User> usersPage = userRepository.findAll(pageable);
+        List<UserWithRoles> usersWithRoles = usersPage.stream()
                 .map(user -> new UserWithRoles(
                         user.getId(),
                         user.getUsername(),
@@ -77,6 +80,8 @@ public class AdminServiceImpl implements AdminService {
                         user.getProfileImagePath()
                 ))
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(usersWithRoles, pageable, usersPage.getTotalElements());
     }
 
 

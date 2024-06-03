@@ -18,7 +18,7 @@ public class LikeController {
     }
 
     @PostMapping("/{postId}")
-    public ResponseEntity<?> addLike(@PathVariable int postId, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<?> addLike(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) {
         try {
             Like like = likeService.addLike(jwt, postId);
             LikeResponse likeResponse = Utils.convertToLikeResponse(like);
@@ -31,7 +31,7 @@ public class LikeController {
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<?> deleteLike(@PathVariable int postId, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<?> deleteLike(@PathVariable Long postId, @RequestHeader("Authorization") String jwt) {
         try {
             likeService.deleteLike(jwt, postId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -43,7 +43,7 @@ public class LikeController {
     }
 
     @GetMapping("/{postId}/check")
-    public ResponseEntity<?> checkLike(@RequestHeader("Authorization") String jwt, @PathVariable int postId) {
+    public ResponseEntity<?> checkLike(@RequestHeader("Authorization") String jwt, @PathVariable Long postId) {
         try {
             boolean hasLiked = likeService.checkUserLikedPost(jwt, postId);
             return ResponseEntity.ok(hasLiked);

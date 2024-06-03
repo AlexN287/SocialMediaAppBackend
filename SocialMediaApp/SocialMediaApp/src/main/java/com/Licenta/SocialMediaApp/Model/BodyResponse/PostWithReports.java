@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostWithReports {
-    private int id;
+    private Long id;
     private UserResponse user;
     private Content content;
     private LocalDateTime createdAt;

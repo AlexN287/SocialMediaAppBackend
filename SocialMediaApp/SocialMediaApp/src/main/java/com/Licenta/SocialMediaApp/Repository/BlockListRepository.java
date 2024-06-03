@@ -13,11 +13,11 @@ import java.util.Optional;
 public interface BlockListRepository extends JpaRepository<BlockList, BlockListId> {
     @Query("SELECT bl FROM BlockList bl WHERE " +
             "bl.id.user.id = :userId AND bl.id.blockedUser.id = :blockedUserId")
-    Optional<BlockList> findByUserAndBlockedUser(@Param("userId") int userId, @Param("blockedUserId") int blockedUserId);
+    Optional<BlockList> findByUserAndBlockedUser(@Param("userId") Long userId, @Param("blockedUserId") Long blockedUserId);
 
     @Query("SELECT bl.id.blockedUser FROM BlockList bl WHERE bl.id.user.id = :userId")
-    List<User> findBlockedUsersByUserId(@Param("userId") int userId);
+    List<User> findBlockedUsersByUserId(@Param("userId") Long userId);
 
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END FROM BlockList b WHERE b.id.blockedUser.id = :blockedUserId AND b.id.user.id = :userId")
-    boolean existsByBlockedUserAndUser(@Param("userId") int userId, @Param("blockedUserId") int blockedUserId);
+    boolean existsByBlockedUserAndUser(@Param("userId") Long userId, @Param("blockedUserId") Long blockedUserId);
 }

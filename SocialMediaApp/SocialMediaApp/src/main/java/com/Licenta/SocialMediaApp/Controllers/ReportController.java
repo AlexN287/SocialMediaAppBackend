@@ -25,7 +25,7 @@ public class ReportController {
     }
 
     @DeleteMapping("/delete/{reportId}")
-    public ResponseEntity<?> deleteReport(@PathVariable int reportId, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<?> deleteReport(@PathVariable Long reportId, @RequestHeader("Authorization") String jwt) {
         try {
             reportService.deleteReportById(reportId, jwt);
             return ResponseEntity.ok("Report deleted successfully");
@@ -37,7 +37,7 @@ public class ReportController {
     }
 
     @GetMapping("/reports/{postId}")
-    public ResponseEntity<List<Report>> getReportsByPostId(@PathVariable int postId) {
+    public ResponseEntity<List<Report>> getReportsByPostId(@PathVariable Long postId) {
         List<Report> reports = reportService.findByPostId(postId);
         return ResponseEntity.ok(reports);
     }

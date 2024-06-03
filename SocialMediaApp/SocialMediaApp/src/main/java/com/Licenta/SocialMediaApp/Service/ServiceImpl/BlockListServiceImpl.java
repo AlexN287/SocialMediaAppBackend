@@ -31,7 +31,7 @@ public class BlockListServiceImpl implements BlockListService {
     }
     @Override
     @Transactional
-    public boolean blockUser(String jwt, int blockedUserId) {
+    public boolean blockUser(String jwt, Long blockedUserId) {
         User loggedUser = userService.findUserByJwt(jwt);
 
         Optional<BlockList> existingBlock = blockListRepository.findByUserAndBlockedUser(loggedUser.getId(), blockedUserId);
@@ -59,7 +59,7 @@ public class BlockListServiceImpl implements BlockListService {
     }
 
     @Override
-    public boolean unblockUser(String jwt, int blockedUserId) {
+    public boolean unblockUser(String jwt, Long blockedUserId) {
         User loggedUser = userService.findUserByJwt(jwt);
 
         Optional<BlockList> block = blockListRepository.findByUserAndBlockedUser(loggedUser.getId(), blockedUserId);
@@ -74,12 +74,12 @@ public class BlockListServiceImpl implements BlockListService {
     }
 
     @Override
-    public List<User> getBlockedUsersByUserId(int userId) {
+    public List<User> getBlockedUsersByUserId(Long userId) {
         return blockListRepository.findBlockedUsersByUserId(userId);
     }
 
     @Override
-    public boolean isUserBlockedBy(String jwt, int otherUserId) {
+    public boolean isUserBlockedBy(String jwt, Long otherUserId) {
         User loggedUser = userService.findUserByJwt(jwt);
         return blockListRepository.existsByBlockedUserAndUser(otherUserId, loggedUser.getId());
     }

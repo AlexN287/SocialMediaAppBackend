@@ -32,7 +32,7 @@ public class FrienshipRequestController {
         }
     }
     @GetMapping("/exists/{senderId}/{receiverId}")
-    public boolean checkFriendshipExists(@PathVariable int senderId, @PathVariable int receiverId) {
+    public boolean checkFriendshipExists(@PathVariable Long senderId, @PathVariable Long receiverId) {
         return friendshipRequestRepository.findBySenderIdAndReceiverId(senderId, receiverId).isPresent();
     }
     @GetMapping("/requests")
@@ -46,7 +46,7 @@ public class FrienshipRequestController {
     }
 
     @PatchMapping("/declineRequest")
-    public ResponseEntity<String> declineFriendshipRequest(@RequestHeader("Authorization")String jwt, @RequestParam int senderId)
+    public ResponseEntity<String> declineFriendshipRequest(@RequestHeader("Authorization")String jwt, @RequestParam Long senderId)
     {
         try {
             friendshipRequestService.declineFriendshipRequest(jwt, senderId);
@@ -58,7 +58,7 @@ public class FrienshipRequestController {
     }
 
     @PostMapping("/acceptRequest")
-    public ResponseEntity<String> acceptFriendshipRequest(@RequestHeader("Authorization")String jwt, @RequestParam int senderId)
+    public ResponseEntity<String> acceptFriendshipRequest(@RequestHeader("Authorization")String jwt, @RequestParam Long senderId)
     {
         try {
             friendshipRequestService.acceptFriendshipRequest(jwt, senderId);

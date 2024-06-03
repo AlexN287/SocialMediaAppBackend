@@ -27,15 +27,15 @@ public class FriendsListServiceImpl implements FriendsListService {
     }
 
     @Override
-    public int countNrOfFriends(int userId) {
+    public int countNrOfFriends(Long userId) {
         return friendsListRepository.countNrOfFriends(userId);
     }
     @Override
-    public boolean isFriendshipExists(int userId1, int userId2) {
+    public boolean isFriendshipExists(Long userId1, Long userId2) {
         return friendsListRepository.isFriendshipExists(userId1, userId2);
     }
     @Override
-    public List<User> findFriendsByUserId(int userId) {
+    public List<User> findFriendsByUserId(Long userId) {
         List<User> friends = friendsListRepository.findFriendsByUserId(userId);
         for (User friend : friends) {
             friend.setPassword(null);
@@ -52,7 +52,7 @@ public class FriendsListServiceImpl implements FriendsListService {
 
     @Override
     @Transactional
-    public void deleteFriend(String jwt, int userId) {
+    public void deleteFriend(String jwt, Long userId) {
         User loggedUser = userService.findUserByJwt(jwt);
 
         Optional<FriendshipRequest> requestOptional = friendshipRequestRepository.findBySenderIdAndReceiverId(loggedUser.getId(), userId);

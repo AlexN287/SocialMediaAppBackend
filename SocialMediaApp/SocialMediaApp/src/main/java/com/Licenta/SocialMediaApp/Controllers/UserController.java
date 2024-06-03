@@ -41,7 +41,7 @@ public class UserController {
         }
     }
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable int userId) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long userId) {
         try {
             User user = userService.findById(userId);
             UserResponse response = Utils.convertToUserResponse(user);
@@ -53,7 +53,7 @@ public class UserController {
         }
     }
     @PostMapping("/{userId}/uploadProfileImage")
-    public ResponseEntity<?> uploadProfileImage(@PathVariable int userId,
+    public ResponseEntity<?> uploadProfileImage(@PathVariable Long userId,
                                                 @RequestParam("file") MultipartFile file) {
         try {
             userService.uploadUserProfileImage(userId, file);
@@ -64,7 +64,7 @@ public class UserController {
         }
     }
     @GetMapping("/{userId}/loadProfileImage")
-    public ResponseEntity<?> getProfileImage(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<?> getProfileImage(@PathVariable Long userId, @RequestHeader("Authorization") String jwt) {
         try {
             System.out.println("Profile image");
             byte[] imageBytes = userService.getUserProfileImage(userId, jwt);

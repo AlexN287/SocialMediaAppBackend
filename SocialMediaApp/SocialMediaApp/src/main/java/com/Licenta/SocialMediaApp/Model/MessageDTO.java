@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MessageDTO {
-    private Integer senderId;
-    private Integer conversationId;
+    private Long senderId;
+    private Long conversationId;
     private String content;
     private MessageType type;
     private LocalDateTime timestamp;

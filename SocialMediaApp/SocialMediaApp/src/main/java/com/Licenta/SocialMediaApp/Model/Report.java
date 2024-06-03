@@ -16,7 +16,7 @@ public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "report_id")
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

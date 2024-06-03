@@ -75,7 +75,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     @Transactional
-    public void createPrivateConversation(int userId, String jwt) {
+    public void createPrivateConversation(Long userId, String jwt) {
         User loggedUser = userService.findUserByJwt(jwt);
         List<Integer> existingConversations = conversationMembersRepository.findConversationIdByUserIds(loggedUser.getId(), userId);
 
@@ -109,7 +109,7 @@ public class ConversationServiceImpl implements ConversationService {
     @Transactional
     public void createGroupConversation(String name,
                                         MultipartFile groupImage,
-                                        List<Integer> members,
+                                        List<Long> members,
                                         String jwt) throws IOException {
         Conversation newConversation = new Conversation();
         newConversation.setName(name);
@@ -128,7 +128,7 @@ public class ConversationServiceImpl implements ConversationService {
         User loggedUser = userService.findUserByJwt(jwt);
         addMemberToConversation(newConversation, loggedUser);
         // Add each member to the conversation
-        for (Integer userId : members) {
+        for (Long userId : members) {
             User user = new User();
             user.setId(userId);
             addMemberToConversation(newConversation, user);
@@ -139,7 +139,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public void addGroupMember(int conversationId, int userId) {
+    public void addGroupMember(Long conversationId, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
         Conversation conversation = conversationRepository.findById(conversationId)
@@ -160,7 +160,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public void removeGroupMember(int conversationId, int userId) {
+    public void removeGroupMember(Long conversationId, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
         Conversation conversation = conversationRepository.findById(conversationId)
@@ -177,14 +177,14 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public void leaveGroup(int conversationId, String jwt) {
+    public void leaveGroup(Long conversationId, String jwt) {
         User loggedUser = userService.findUserByJwt(jwt);
 
         removeGroupMember(conversationId, loggedUser.getId());
     }
 
     @Override
-    public byte[] loadConversationImage(int conversationId, String jwt) throws IOException {
+    public byte[] loadConversationImage(Long conversationId, String jwt) throws IOException {
         System.out.println("Conversation Image");
 
         User loggedUser = userService.findUserByJwt(jwt);
@@ -206,7 +206,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public List<User> getMembersByConversationId(int conversationId) {
+    public List<User> getMembersByConversationId(Long conversationId) {
         List<ConversationMembers> members = conversationMembersRepository.findByConversationId(conversationId);
 
         return members.stream()
@@ -214,7 +214,7 @@ public class ConversationServiceImpl implements ConversationService {
                 // Access User through the embedded ID
                 .collect(Collectors.toList());
     }
-    public List<UserResponse> findFriendsNotInConversation(String jwt, int conversationId) {
+    public List<UserResponse> findFriendsNotInConversation(String jwt, Long conversationId) {
         User loggedUser = userService.findUserByJwt(jwt);
 
         List<User> friendsNotInConversation = conversationMembersRepository.findAllFriendsNotInConversation(loggedUser.getId(), conversationId);
@@ -224,8 +224,8 @@ public class ConversationServiceImpl implements ConversationService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<Object> getConversationContent(int conversationId) {
+    /*@Override
+    public List<Object> getConversationContent(Long conversationId) {
         List<Message> messages = messageRepository.findByConversationId(conversationId);
         List<Poll> polls = pollRepository.findByConversationId(conversationId);
 
@@ -243,5 +243,33 @@ public class ConversationServiceImpl implements ConversationService {
         }));
 
         return combinedList;
+    }*/
+
+    @Override
+    public List<Conversation> searchUsersConversation(String jwt, String term) {
+        User loggedUser = userService.findUserByJwt(jwt);
+        List<Conversation> conversations = conversationRepository.searchConversationsByUserId(loggedUser.getId(), term);
+
+        List<Conversation> filteredConversations = new ArrayList<>();
+
+        conversations.forEach(conversation -> {
+            if (conversation.getName() == null || conversation.getConversationImagePath() == null) {
+                // Identify as a private conversation
+                // Fetch the other user's username in this conversation and update
+                User user = conversationMembersRepository.findOtherUserInPrivateConversation(conversation.getId(), loggedUser.getId());
+                conversation.setName(user.getUsername());
+                // Set a default image or fetch from the other user's profile
+                conversation.setConversationImagePath(user.getProfileImagePath());
+
+                boolean areFriends = friendsListService.isFriendshipExists(loggedUser.getId(), user.getId());
+                if (areFriends) {
+                    filteredConversations.add(conversation);
+                }
+            } else {
+                filteredConversations.add(conversation);
+            }
+        });
+
+        return filteredConversations;
     }
 }

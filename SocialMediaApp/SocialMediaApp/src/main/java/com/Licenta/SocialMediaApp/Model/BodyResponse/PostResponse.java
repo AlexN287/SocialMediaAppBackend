@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostResponse {
-    private int id;
+    private Long id;
     private UserResponse user;
     private Content content;
     private LocalDateTime createdAt;

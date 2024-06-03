@@ -2,8 +2,10 @@ package com.Licenta.SocialMediaApp.Controllers;
 
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserWithRoles;
+import com.Licenta.SocialMediaApp.Model.Conversation;
 import com.Licenta.SocialMediaApp.Model.User;
 import com.Licenta.SocialMediaApp.Service.AdminService;
+import com.Licenta.SocialMediaApp.Service.ConversationService;
 import com.Licenta.SocialMediaApp.Service.UserService;
 import com.Licenta.SocialMediaApp.Utils.Utils;
 import org.springframework.http.HttpStatus;
@@ -19,14 +21,16 @@ import java.util.stream.Collectors;
 public class SearchController {
     private final UserService userService;
     private final AdminService adminService;
-    public SearchController(UserService userService, AdminService adminService) {
+    private final ConversationService conversationService;
+    public SearchController(UserService userService, AdminService adminService, ConversationService conversationService) {
         this.userService = userService;
         this.adminService = adminService;
+        this.conversationService = conversationService;
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> searchUsers(@RequestParam String username) {
-        List<User> users = userService.findByUsernameContainingIgnoreCase(username);
+    public ResponseEntity<List<UserResponse>> searchUsers(@RequestParam String username, @RequestHeader("Authorization") String jwt) {
+        List<User> users = userService.searchByUsernameExcludingLoggedInUser(username, jwt);
         List<UserResponse> responses = users.stream()
                 .map(Utils::convertToUserResponse)
                 .collect(Collectors.toList());
@@ -45,6 +49,12 @@ public class SearchController {
                 .map(Utils::convertToUserWithRoles)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/conversation/user")
+    public ResponseEntity<List<Conversation>> searchUserConversations(@RequestHeader("Authorization") String jwt, @RequestParam String term) {
+        List<Conversation> conversations = conversationService.searchUsersConversation(jwt, term);
+        return ResponseEntity.ok(conversations);
     }
 
 }

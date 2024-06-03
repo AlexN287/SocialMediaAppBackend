@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class ReportResponse {
-    private int id;
+    private Long id;
 
     private UserResponse user;
     private String reason;

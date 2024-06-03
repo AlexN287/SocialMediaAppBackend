@@ -8,11 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface FriendshipRequestRepository extends JpaRepository<FriendshipRequest, Integer> {
-    Optional<FriendshipRequest> findBySenderIdAndReceiverId(int senderId, int receiverId);
+public interface FriendshipRequestRepository extends JpaRepository<FriendshipRequest, Long> {
+    Optional<FriendshipRequest> findBySenderIdAndReceiverId(Long senderId, Long receiverId);
     @Query("SELECT fr.sender FROM FriendshipRequest fr WHERE fr.receiver.id = :receiverId AND fr.status = 'PENDING'")
-    List<User> findSendersByReceiverIdWithPendingStatus(int receiverId);
+    List<User> findSendersByReceiverIdWithPendingStatus(Long receiverId);
     @Query("SELECT COUNT(fr) FROM FriendshipRequest fr WHERE fr.receiver.id = :receiverId AND fr.status = 'PENDING'")
-    int countPendingFriendshipRequests(int receiverId);
+    int countPendingFriendshipRequests(Long receiverId);
 
 }

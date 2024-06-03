@@ -21,7 +21,7 @@ public class BlockListController {
     }
 
     @PostMapping("/blockUser/{blockedUserId}")
-    public ResponseEntity<?> blockUser(@RequestHeader("Authorization")String jwt, @PathVariable int blockedUserId) {
+    public ResponseEntity<?> blockUser(@RequestHeader("Authorization")String jwt, @PathVariable Long blockedUserId) {
         boolean blocked = blockListService.blockUser(jwt, blockedUserId);
 
         if (blocked) {
@@ -32,7 +32,7 @@ public class BlockListController {
     }
 
     @DeleteMapping("/unblock/{blockedUserId}")
-    public ResponseEntity<?> unblockUser(@RequestHeader("Authorization")String jwt, @PathVariable int blockedUserId) {
+    public ResponseEntity<?> unblockUser(@RequestHeader("Authorization")String jwt, @PathVariable Long blockedUserId) {
         boolean unblocked = blockListService.unblockUser(jwt, blockedUserId);
 
         if (unblocked) {
@@ -43,7 +43,7 @@ public class BlockListController {
     }
 
     @GetMapping("/blockedBy/{userId}")
-    public ResponseEntity<List<UserResponse>> getBlockedUsers(@PathVariable int userId) {
+    public ResponseEntity<List<UserResponse>> getBlockedUsers(@PathVariable Long userId) {
         try {
             List<User> blockedUsers = blockListService.getBlockedUsersByUserId(userId);
             List<UserResponse> userResponses = blockedUsers.stream()
@@ -56,7 +56,7 @@ public class BlockListController {
     }
 
     @GetMapping("/isBlockedBy/{otherUserId}")
-    public ResponseEntity<Boolean> isUserBlockedBy(@RequestHeader("Authorization") String jwt, @PathVariable int otherUserId) {
+    public ResponseEntity<Boolean> isUserBlockedBy(@RequestHeader("Authorization") String jwt, @PathVariable Long otherUserId) {
         try {
             boolean isBlocked = blockListService.isUserBlockedBy(jwt, otherUserId);
             return ResponseEntity.ok(isBlocked);

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ReportRepository extends JpaRepository<Report, Integer> {
-    void deleteById(int reportId);
-    List<Report> findByPostId(int postId);
+public interface ReportRepository extends JpaRepository<Report, Long> {
+    void deleteById(Long reportId);
+    List<Report> findByPostId(Long postId);
 }

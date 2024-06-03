@@ -20,7 +20,7 @@ public class CommentController {
     }
 
     @PostMapping("/{postId}")
-    public ResponseEntity<CommentResponse> addComment(@PathVariable int postId, @RequestParam String commentText, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<CommentResponse> addComment(@PathVariable Long postId, @RequestParam String commentText, @RequestHeader("Authorization") String jwt) {
         try {
             Comment comment = commentService.addComment(jwt, postId, commentText);
             CommentResponse commentResponse = Utils.convertToCommentResponse(comment);
@@ -32,7 +32,7 @@ public class CommentController {
         }
     }
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable int commentId, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<?> deleteComment(@PathVariable Long commentId, @RequestHeader("Authorization") String jwt) {
         try {
             commentService.deleteComment(commentId, jwt);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -46,19 +46,19 @@ public class CommentController {
     }
 
     @GetMapping("/{postId}/count")
-    public ResponseEntity<Long> getCommentCount(@PathVariable int postId) {
+    public ResponseEntity<Long> getCommentCount(@PathVariable Long postId) {
         long commentCount = commentService.getCommentCountForPost(postId);
         return ResponseEntity.ok(commentCount);
     }
 
     @GetMapping("/{postId}/comments")
-    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable int postId) {
+    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable Long postId) {
         List<CommentResponse> comments = commentService.getCommentsForPost(postId);
         return ResponseEntity.ok(comments);
     }
     @PatchMapping("/edit/{commentId}")
     public ResponseEntity<?> updateCommentContent(
-            @PathVariable int commentId,
+            @PathVariable Long commentId,
             @RequestParam("text") String newText,
             @RequestHeader("Authorization") String jwt) {
         try {

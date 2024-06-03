@@ -6,9 +6,9 @@ import com.Licenta.SocialMediaApp.Model.Comment;
 import java.util.List;
 
 public interface CommentService {
-    Comment addComment(String jwt, int postId, String commentText);
-    void deleteComment(int commentId, String jwt);
-    long getCommentCountForPost(int postId);
-    List<CommentResponse> getCommentsForPost(int postId);
-    Comment updateCommentText(int commentId, String newText, String jwt);
+    Comment addComment(String jwt, Long postId, String commentText);
+    void deleteComment(Long commentId, String jwt);
+    long getCommentCountForPost(Long postId);
+    List<CommentResponse> getCommentsForPost(Long postId);
+    Comment updateCommentText(Long commentId, String newText, String jwt);
 }

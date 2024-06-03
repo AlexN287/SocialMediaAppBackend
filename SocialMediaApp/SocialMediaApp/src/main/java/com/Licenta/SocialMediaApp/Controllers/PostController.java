@@ -29,7 +29,7 @@ public class PostController {
     }
 
     @GetMapping("/count/{userId}")
-    public ResponseEntity<Integer> getNrOfPosts(@PathVariable int userId) {
+    public ResponseEntity<Integer> getNrOfPosts(@PathVariable Long userId) {
         try {
             int postNr = postService.getPostsNrOfUser(userId);
             return ResponseEntity.ok(postNr);
@@ -55,7 +55,7 @@ public class PostController {
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> deletePost(
-            @PathVariable int postId,
+            @PathVariable Long postId,
             @RequestHeader("Authorization") String jwt) {
         try {
             postService.deletePost(postId, jwt);
@@ -68,7 +68,7 @@ public class PostController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<List<PostResponse>> getAllPostsByUser(@PathVariable int userId) {
+    public ResponseEntity<List<PostResponse>> getAllPostsByUser(@PathVariable Long userId) {
         try {
             List<Post> posts = postService.getAllPostsByUser(userId);
             List<PostResponse> postResponses = posts.stream()
@@ -82,18 +82,18 @@ public class PostController {
 
 
     @GetMapping("/{postId}/likes/count")
-    public ResponseEntity<Long> getLikesCount(@PathVariable int postId) {
+    public ResponseEntity<Long> getLikesCount(@PathVariable Long postId) {
         long likesCount = postService.getLikesCountForPost(postId);
         return ResponseEntity.ok(likesCount);
     }
 
     @GetMapping("/{postId}/likes/users")
-    public ResponseEntity<List<UserResponse>> getUsersWhoLiked(@PathVariable int postId) {
+    public ResponseEntity<List<UserResponse>> getUsersWhoLiked(@PathVariable Long postId) {
         List<UserResponse> users = postService.getUsersWhoLikedPost(postId);
         return ResponseEntity.ok(users);
     }
     @GetMapping("/{postId}/media")
-    public ResponseEntity<?> getPostMedia(@PathVariable int postId) {
+    public ResponseEntity<?> getPostMedia(@PathVariable Long postId) {
         try {
             System.out.println("Post Media");
             byte[] mediaBytes = postService.getPostMedia(postId);
@@ -130,7 +130,7 @@ public class PostController {
 
     @PatchMapping("/{postId}/updateContent")
     public ResponseEntity<?> updatePostContent(
-            @PathVariable int postId,
+            @PathVariable Long postId,
             @RequestParam("content") String content,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestHeader("Authorization") String jwt) {

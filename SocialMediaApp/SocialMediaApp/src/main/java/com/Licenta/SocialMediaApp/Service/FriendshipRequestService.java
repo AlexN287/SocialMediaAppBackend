@@ -8,6 +8,6 @@ import java.util.List;
 public interface FriendshipRequestService {
     List<UserResponse> findFriendshipRequestsSenders(String jwt);
     int getNrOfFrienshipRequests(String jwt);
-    void declineFriendshipRequest(String jwt, int senderId);
-    void acceptFriendshipRequest(String jwt, int senderId);
+    void declineFriendshipRequest(String jwt, Long senderId);
+    void acceptFriendshipRequest(String jwt, Long senderId);
 }

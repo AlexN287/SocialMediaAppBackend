@@ -5,8 +5,8 @@ import com.Licenta.SocialMediaApp.Model.User;
 import java.util.List;
 
 public interface BlockListService {
-    boolean blockUser(String jwt, int blockedUserId);
-    boolean unblockUser(String jwt, int blockedUserId);
-    List<User> getBlockedUsersByUserId(int userId);
-    boolean isUserBlockedBy(String jwt, int otherUserId);
+    boolean blockUser(String jwt, Long blockedUserId);
+    boolean unblockUser(String jwt, Long blockedUserId);
+    List<User> getBlockedUsersByUserId(Long userId);
+    boolean isUserBlockedBy(String jwt, Long otherUserId);
 }

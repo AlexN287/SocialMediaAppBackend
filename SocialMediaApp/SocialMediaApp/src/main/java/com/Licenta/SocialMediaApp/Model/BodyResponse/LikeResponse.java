@@ -12,7 +12,7 @@ import lombok.Setter;
 @Getter @Setter
 @AllArgsConstructor @NoArgsConstructor
 public class LikeResponse {
-    private int id;
+    private Long id;
 
     private UserResponse user;
 

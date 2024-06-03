@@ -56,7 +56,7 @@ public class S3Service {
             throw new RuntimeException("Failed to delete object from S3");
         }
     }
-    public String generateProfileImageKey(int userId, MultipartFile file)
+    public String generateProfileImageKey(Long userId, MultipartFile file)
     {
         String originalFilename = file.getOriginalFilename();
         String extension = "";
@@ -70,7 +70,7 @@ public class S3Service {
         return key;
     }
 
-    public String generateGroupImageKey(int conversationId, MultipartFile file)
+    public String generateGroupImageKey(Long conversationId, MultipartFile file)
     {
         String originalFilename = file.getOriginalFilename();
         String extension = "";
@@ -84,7 +84,7 @@ public class S3Service {
         return key;
     }
 
-    public String generatePostKey(int postId, int userId, MultipartFile file)
+    public String generatePostKey(Long postId, Long userId, MultipartFile file)
     {
         String originalFilename = file.getOriginalFilename();
         String extension = "";

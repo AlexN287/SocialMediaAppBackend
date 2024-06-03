@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface CommentRepository extends JpaRepository<Comment, Integer> {
+public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("SELECT COUNT(c) FROM Comment c WHERE c.post.id = :postId")
-    long countByPostId(int postId);
-    List<Comment> findByPostId(int postId);
-    void deleteByPostId(int postId);
+    long countByPostId(Long postId);
+    List<Comment> findByPostId(Long postId);
+    void deleteByPostId(Long postId);
 }

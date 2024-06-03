@@ -36,7 +36,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment addComment(String jwt, int postId, String commentText) {
+    public Comment addComment(String jwt, Long postId, String commentText) {
         User loggedUser = userService.findUserByJwt(jwt);
 
         if (loggedUser == null) {
@@ -60,7 +60,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void deleteComment(int commentId, String jwt) {
+    public void deleteComment(Long commentId, String jwt) {
         User loggedUser = userService.findUserByJwt(jwt);
 
         if (loggedUser == null) {
@@ -78,11 +78,11 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.delete(comment);
     }
     @Override
-    public long getCommentCountForPost(int postId) {
+    public long getCommentCountForPost(Long postId) {
         return commentRepository.countByPostId(postId);
     }
     @Override
-    public List<CommentResponse> getCommentsForPost(int postId) {
+    public List<CommentResponse> getCommentsForPost(Long postId) {
         List<Comment> comments = commentRepository.findByPostId(postId);
         return comments.stream()
                 .map(Utils::convertToCommentResponse)
@@ -91,7 +91,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public Comment updateCommentText(int commentId, String newText, String jwt) {
+    public Comment updateCommentText(Long commentId, String newText, String jwt) {
         User user = userService.findUserByJwt(jwt);
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));

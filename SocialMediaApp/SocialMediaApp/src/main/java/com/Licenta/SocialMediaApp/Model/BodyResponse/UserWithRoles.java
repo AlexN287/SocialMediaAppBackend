@@ -10,7 +10,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserWithRoles {
-    private int id;
+    private Long id;
     private String username;
     private Set<String> roles;
     private String email;

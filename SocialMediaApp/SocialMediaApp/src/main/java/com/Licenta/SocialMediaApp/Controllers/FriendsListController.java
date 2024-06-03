@@ -22,7 +22,7 @@ public class FriendsListController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<Integer> getNrOfFriends(@PathVariable int userId) {
+    public ResponseEntity<Integer> getNrOfFriends(@PathVariable Long userId) {
         try {
             int friendsNr = friendsListService.countNrOfFriends(userId);
             return ResponseEntity.ok(friendsNr);
@@ -31,7 +31,7 @@ public class FriendsListController {
         }
     }
     @GetMapping("/checkFriendship")
-    public ResponseEntity<Boolean> checkIfUsersAreFriends(@RequestParam int userId1, @RequestParam int userId2) {
+    public ResponseEntity<Boolean> checkIfUsersAreFriends(@RequestParam Long userId1, @RequestParam Long userId2) {
         try {
             boolean areFriends = friendsListService.isFriendshipExists(userId1, userId2);
             return ResponseEntity.ok(areFriends);
@@ -41,7 +41,7 @@ public class FriendsListController {
         }
     }
     @GetMapping("/userFriends/{userId}")
-    public ResponseEntity<List<UserResponse>> getAllFriends(@PathVariable int userId) {
+    public ResponseEntity<List<UserResponse>> getAllFriends(@PathVariable Long userId) {
         try {
             List<User> friends = friendsListService.findFriendsByUserId(userId);
             List<UserResponse> userResponses = friends.stream()
@@ -53,7 +53,7 @@ public class FriendsListController {
         }
     }
     @DeleteMapping("/delete/{userid}")
-    public ResponseEntity<String> deleteFriend(@RequestHeader("Authorization")String jwt,@PathVariable int userid)
+    public ResponseEntity<String> deleteFriend(@RequestHeader("Authorization")String jwt,@PathVariable Long userid)
     {
         try {
             friendsListService.deleteFriend(jwt, userid);

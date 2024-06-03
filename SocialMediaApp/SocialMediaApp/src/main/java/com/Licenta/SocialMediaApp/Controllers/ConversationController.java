@@ -11,6 +11,8 @@ import com.Licenta.SocialMediaApp.Service.MessageService;
 import com.Licenta.SocialMediaApp.Utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +40,7 @@ public class ConversationController {
 
     @PostMapping("/private/create")
     public ResponseEntity<?> createPrivateConversationControllerMethod(
-            @RequestParam int userId,
+            @RequestParam Long userId,
             @RequestHeader("Authorization") String jwt) {
         try {
             conversationService.createPrivateConversation(userId, jwt);
@@ -55,7 +57,7 @@ public class ConversationController {
     @PostMapping("/group/create")
     public ResponseEntity<String> createGroupConversation(
             @RequestParam String name,
-            @RequestParam List<Integer> members,
+            @RequestParam List<Long> members,
             @RequestParam MultipartFile groupImage,
             @RequestHeader("Authorization")String jwt) {
         try {
@@ -67,8 +69,8 @@ public class ConversationController {
     }
     @PostMapping("/group/{conversationId}/members/add")
     public ResponseEntity<?> addGroupMember(
-            @PathVariable int conversationId,
-            @RequestParam int userId) {
+            @PathVariable Long conversationId,
+            @RequestParam Long userId) {
         try {
             conversationService.addGroupMember(conversationId, userId);
             return ResponseEntity.ok().body("User added to the group successfully.");
@@ -78,8 +80,8 @@ public class ConversationController {
     }
     @DeleteMapping("/group/{conversationId}/members/remove/{userId}")
     public ResponseEntity<?> removeGroupMember(
-            @PathVariable int conversationId,
-            @PathVariable int userId) {
+            @PathVariable Long conversationId,
+            @PathVariable Long userId) {
         try {
             conversationService.removeGroupMember(conversationId, userId);
             return ResponseEntity.ok().body("User removed from the group successfully.");
@@ -88,7 +90,7 @@ public class ConversationController {
         }
     }
     @DeleteMapping("/group/{conversationId}/leave")
-    public ResponseEntity<?> leaveGroup(@PathVariable int conversationId, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<?> leaveGroup(@PathVariable Long conversationId, @RequestHeader("Authorization") String jwt) {
         try {
             conversationService.leaveGroup(conversationId, jwt);
             return ResponseEntity.ok().body("Left group successfully.");
@@ -97,7 +99,7 @@ public class ConversationController {
         }
     }
     @GetMapping("/{conversationId}/image")
-    public ResponseEntity<?> loadConversationImage(@PathVariable int conversationId, @RequestHeader("Authorization") String jwt)
+    public ResponseEntity<?> loadConversationImage(@PathVariable Long conversationId, @RequestHeader("Authorization") String jwt)
     {
         try {
             byte[] image = conversationService.loadConversationImage(conversationId, jwt);
@@ -111,19 +113,20 @@ public class ConversationController {
     }
 
     @GetMapping("/{conversationId}/messages")
-    public ResponseEntity<List<MessageResponse>> getMessagesByConversationId(@PathVariable int conversationId) {
+    public ResponseEntity<Page<MessageResponse>> getMessagesByConversationId(
+            @PathVariable Long conversationId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         try {
-            List<Message> messages = messageService.getMessagesByConversationId(conversationId);
-            List<MessageResponse> messageResponses = messages.stream()
-                    .map(Utils::convertToMessageResponse)
-                    .collect(Collectors.toList());
-            return new ResponseEntity<>(messageResponses, HttpStatus.OK);
+            Page<Message> messagesPage = messageService.getMessagesByConversationId(conversationId, PageRequest.of(page, size));
+            Page<MessageResponse> messageResponsesPage = messagesPage.map(Utils::convertToMessageResponse);
+            return new ResponseEntity<>(messageResponsesPage, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     @GetMapping("/{conversationId}/members")
-    public ResponseEntity<List<UserResponse>> getConversationMembers(@PathVariable int conversationId) {
+    public ResponseEntity<List<UserResponse>> getConversationMembers(@PathVariable Long conversationId) {
         try {
             List<User> members = conversationService.getMembersByConversationId(conversationId);
             List<UserResponse> memberDTOs = members.stream()
@@ -138,7 +141,7 @@ public class ConversationController {
     }
 
     @GetMapping("/{conversationId}/friends-not-in-conversation")
-    public ResponseEntity<List<UserResponse>> getFriendsNotInConversation(@PathVariable int conversationId,
+    public ResponseEntity<List<UserResponse>> getFriendsNotInConversation(@PathVariable Long conversationId,
                                                                           @RequestHeader("Authorization") String token) {
 
         try {
@@ -150,8 +153,8 @@ public class ConversationController {
         }
     }
 
-    @GetMapping("/{conversationId}/content")
-    public List<Object> getConversationContent(@PathVariable int conversationId) {
+    /*@GetMapping("/{conversationId}/content")
+    public List<Object> getConversationContent(@PathVariable Long conversationId) {
         return conversationService.getConversationContent(conversationId);
-    }
+    }*/
 }

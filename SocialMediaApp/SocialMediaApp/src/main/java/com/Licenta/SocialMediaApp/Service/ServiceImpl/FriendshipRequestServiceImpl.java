@@ -47,7 +47,7 @@ public class FriendshipRequestServiceImpl implements FriendshipRequestService {
     }
 
     @Override
-    public void declineFriendshipRequest(String jwt, int senderId) {
+    public void declineFriendshipRequest(String jwt, Long senderId) {
         User receiver = userService.findUserByJwt(jwt);
 
         FriendshipRequest friendshipRequest = friendshipRequestRepository.findBySenderIdAndReceiverId(senderId, receiver.getId())
@@ -58,7 +58,7 @@ public class FriendshipRequestServiceImpl implements FriendshipRequestService {
     }
 
     @Override
-    public void acceptFriendshipRequest(String jwt, int senderId) {
+    public void acceptFriendshipRequest(String jwt, Long senderId) {
         User receiver = userService.findUserByJwt(jwt);
 
         FriendshipRequest friendshipRequest = friendshipRequestRepository.findBySenderIdAndReceiverId(senderId, receiver.getId())
