@@ -65,16 +65,18 @@ public class PostServiceImpl implements PostService {
         Content content = new Content();
         content.setTextContent(text);
 
+        Post createdPost = postRepository.save(post);
+
         if (file != null && !file.isEmpty()) {
-            String filePath = s3Service.generatePostKey(post.getId(), loggedUser.getId(), file);
+            String filePath = s3Service.generatePostKey(createdPost.getId(), loggedUser.getId(), file);
             content.setFilePath(filePath);
             s3Service.putObject(filePath, file.getBytes());
         }
 
         content = contentRepository.save(content);
-        post.setContent(content);
+        createdPost.setContent(content);
 
-        return postRepository.save(post);
+        return postRepository.save(createdPost);
     }
 
 

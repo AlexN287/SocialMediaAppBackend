@@ -1,11 +1,12 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
 import com.Licenta.SocialMediaApp.Exceptions.ConversationAlreadyExistsException;
+import com.Licenta.SocialMediaApp.Model.BodyResponse.ConversationResponse;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.MessageResponse;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
-import com.Licenta.SocialMediaApp.Model.Conversation;
 import com.Licenta.SocialMediaApp.Model.Message;
 import com.Licenta.SocialMediaApp.Model.User;
+import com.Licenta.SocialMediaApp.Repository.MessageRepository;
 import com.Licenta.SocialMediaApp.Service.ConversationService;
 import com.Licenta.SocialMediaApp.Service.MessageService;
 import com.Licenta.SocialMediaApp.Utils.Utils;
@@ -19,7 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -27,14 +30,16 @@ import java.util.stream.Collectors;
 public class ConversationController {
     private final ConversationService conversationService;
     private final MessageService messageService;
+    private final MessageRepository messageRepository;
 
-    public ConversationController(ConversationService conversationService, MessageService messageService) {
+    public ConversationController(ConversationService conversationService, MessageService messageService, MessageRepository messageRepository) {
         this.conversationService = conversationService;
         this.messageService = messageService;
+        this.messageRepository = messageRepository;
     }
 
     @GetMapping("/all")
-    public List<Conversation> getUserConversations(@RequestHeader("Authorization")String jwt) {
+    public List<ConversationResponse> getUserConversations(@RequestHeader("Authorization")String jwt) {
          return conversationService.getUsersConversation(jwt);
     }
 
@@ -157,4 +162,51 @@ public class ConversationController {
     public List<Object> getConversationContent(@PathVariable Long conversationId) {
         return conversationService.getConversationContent(conversationId);
     }*/
+
+    @GetMapping("/media")
+    public ResponseEntity<?> getMessageMedia(@RequestParam String filePath) {
+        try {
+            System.out.println("Message Media");
+            byte[] mediaBytes = messageService.getMessageMedia(filePath);
+            //String mediaKey = messageService.getMediaKey(messageId);
+            String mediaType = getMediaTypeFromKey(filePath);
+
+            /*if (filePath.isEmpty() || filePath == null) {
+                return ResponseEntity.notFound().build();
+            }
+*/
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(mediaType))
+                    .body(new ByteArrayResource(mediaBytes));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error occurred: " + e.getMessage());
+        }
+    }
+
+    private String getMediaTypeFromKey(String key) {
+        if (key.endsWith(".mp4")) {
+            return "video/mp4";
+        } else if (key.endsWith(".jpg") || key.endsWith(".jpeg")) {
+            return "image/jpeg";
+        } else if (key.endsWith(".png")) {
+            return "image/png";
+        }
+        return "application/octet-stream"; // Default or unknown file types
+    }
+    @PostMapping("/uploadFile")
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file,
+                                        @RequestParam("conversationId") Long conversationId,
+                                        @RequestParam("senderId") Long senderId,
+                                        @RequestParam(value = "textContent", required = false) String textContent) {
+        try {
+            String key = messageService.sendFile(file, textContent, conversationId, senderId);
+            Map<String, String> response = new HashMap<>();
+            response.put("filePath", key); // Return the file path as a JSON object
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error occurred: " + e.getMessage());
+        }
+    }
+
 }

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
@@ -17,5 +18,6 @@ public class MessageDTO {
     private Long conversationId;
     private String content;
     private MessageType type;
+    private String filePath;
     private LocalDateTime timestamp;
 }

@@ -26,12 +26,6 @@ public class Conversation {
     @Column(name = "conversation_image_path")
     private String conversationImagePath;
 
-    @Column(name = "last_updated")
-    private LocalDateTime lastUpdated;
-
-    @Column(name = "last_message")
-    private String lastMessage;
-
     @Column(name = "is_group")
     private boolean isGroup;
 }

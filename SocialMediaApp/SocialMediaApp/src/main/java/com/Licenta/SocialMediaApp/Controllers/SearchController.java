@@ -1,5 +1,6 @@
 package com.Licenta.SocialMediaApp.Controllers;
 
+import com.Licenta.SocialMediaApp.Model.BodyResponse.ConversationResponse;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserWithRoles;
 import com.Licenta.SocialMediaApp.Model.Conversation;
@@ -52,8 +53,8 @@ public class SearchController {
     }
 
     @GetMapping("/conversation/user")
-    public ResponseEntity<List<Conversation>> searchUserConversations(@RequestHeader("Authorization") String jwt, @RequestParam String term) {
-        List<Conversation> conversations = conversationService.searchUsersConversation(jwt, term);
+    public ResponseEntity<List<ConversationResponse>> searchUserConversations(@RequestHeader("Authorization") String jwt, @RequestParam String term) {
+        List<ConversationResponse> conversations = conversationService.searchUsersConversation(jwt, term);
         return ResponseEntity.ok(conversations);
     }
 

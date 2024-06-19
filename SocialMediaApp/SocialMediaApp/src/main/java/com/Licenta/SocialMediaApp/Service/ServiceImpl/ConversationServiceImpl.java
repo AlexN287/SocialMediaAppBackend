@@ -3,6 +3,7 @@ package com.Licenta.SocialMediaApp.Service.ServiceImpl;
 import com.Licenta.SocialMediaApp.Config.AwsS3.S3Service;
 import com.Licenta.SocialMediaApp.Exceptions.ConversationAlreadyExistsException;
 import com.Licenta.SocialMediaApp.Model.*;
+import com.Licenta.SocialMediaApp.Model.BodyResponse.ConversationResponse;
 import com.Licenta.SocialMediaApp.Model.BodyResponse.UserResponse;
 import com.Licenta.SocialMediaApp.Repository.*;
 import com.Licenta.SocialMediaApp.Service.ConversationService;
@@ -45,32 +46,43 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public List<Conversation> getUsersConversation(String jwt) {
+    public List<ConversationResponse> getUsersConversation(String jwt) {
         User loggedUser = userService.findUserByJwt(jwt);
-        List<Conversation> conversations =  conversationRepository.findConversationsByUserIdOrderedByMostRecent(loggedUser.getId());
+        List<Conversation> conversations = conversationRepository.findConversationsByUserIdOrderedByMostRecent(loggedUser.getId());
 
-        List<Conversation> filteredConversations = new ArrayList<>();
+        List<ConversationResponse> conversationDTOs = conversations.stream().map(conversation -> {
+            ConversationResponse dto = new ConversationResponse();
+            dto.setId(conversation.getId());
+            dto.setName(conversation.getName());
+            dto.setCreatedAt(conversation.getCreatedAt());
+            dto.setConversationImagePath(conversation.getConversationImagePath());
+            dto.setGroup(conversation.isGroup());
 
-        conversations.forEach(conversation -> {
             if (conversation.getName() == null || conversation.getConversationImagePath() == null) {
                 // Identify as a private conversation
                 // Fetch the other user's username in this conversation and update
                 User user = conversationMembersRepository.findOtherUserInPrivateConversation(conversation.getId(), loggedUser.getId());
-                conversation.setName(user.getUsername());
+                dto.setName(user.getUsername());
                 // Set a default image or fetch from the other user's profile
-                conversation.setConversationImagePath(user.getProfileImagePath());
+                dto.setConversationImagePath(user.getProfileImagePath());
 
                 boolean areFriends = friendsListService.isFriendshipExists(loggedUser.getId(), user.getId());
-                if (areFriends) {
-                    filteredConversations.add(conversation);
+                if (!areFriends) {
+                    return null; // Skip this conversation if they are not friends
                 }
             }
-            else {
-                filteredConversations.add(conversation);
-            }
-        });
 
-        return filteredConversations;
+            // Fetch the last message and set it in the DTO
+            Message lastMessage = messageRepository.findLatestMessageByConversationId(conversation.getId()).orElse(null);
+            if (lastMessage != null) {
+                dto.setLastMessage(lastMessage.getContent().getTextContent()); // Assuming Content has a getText() method
+                dto.setLastUpdated(lastMessage.getTimestamp());
+            }
+
+            return dto;
+        }).filter(dto -> dto != null).collect(Collectors.toList());
+
+        return conversationDTOs;
     }
 
     @Override
@@ -246,7 +258,7 @@ public class ConversationServiceImpl implements ConversationService {
     }*/
 
     @Override
-    public List<Conversation> searchUsersConversation(String jwt, String term) {
+    public List<ConversationResponse> searchUsersConversation(String jwt, String term) {
         User loggedUser = userService.findUserByJwt(jwt);
         List<Conversation> conversations = conversationRepository.searchConversationsByUserId(loggedUser.getId(), term);
 
@@ -270,6 +282,36 @@ public class ConversationServiceImpl implements ConversationService {
             }
         });
 
-        return filteredConversations;
+        return convertConversationsToDTOs(filteredConversations, loggedUser);
     }
+
+    private List<ConversationResponse> convertConversationsToDTOs(List<Conversation> conversations, User loggedUser) {
+        return conversations.stream().map(conversation -> {
+            ConversationResponse dto = new ConversationResponse();
+            dto.setId(conversation.getId());
+            dto.setName(conversation.getName());
+            dto.setCreatedAt(conversation.getCreatedAt());
+            dto.setConversationImagePath(conversation.getConversationImagePath());
+            dto.setGroup(conversation.isGroup());
+
+            if (conversation.getName() == null || conversation.getConversationImagePath() == null) {
+                // Identify as a private conversation
+                // Fetch the other user's username in this conversation and update
+                User user = conversationMembersRepository.findOtherUserInPrivateConversation(conversation.getId(), loggedUser.getId());
+                dto.setName(user.getUsername());
+                // Set a default image or fetch from the other user's profile
+                dto.setConversationImagePath(user.getProfileImagePath());
+            }
+
+            // Fetch the last message and set it in the DTO
+            Message lastMessage = messageRepository.findLatestMessageByConversationId(conversation.getId()).orElse(null);
+            if (lastMessage != null) {
+                dto.setLastMessage(lastMessage.getContent().getTextContent()); // Assuming Content has a getText() method
+                dto.setLastUpdated(lastMessage.getTimestamp());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
 }

@@ -84,6 +84,20 @@ public class S3Service {
         return key;
     }
 
+    public String generateConversationFileKey(Long conversationId, Long messageId,MultipartFile file)
+    {
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+
+        if (originalFilename != null && originalFilename.lastIndexOf('.') != -1) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+        }
+
+        String key = "conversations/" + conversationId + "/" + S3ContentType.CONVERSATION_FILE + "/" + "file" + messageId + extension;
+
+        return key;
+    }
+
     public String generatePostKey(Long postId, Long userId, MultipartFile file)
     {
         String originalFilename = file.getOriginalFilename();
